@@ -14,6 +14,7 @@ import {
 import { TransactionService } from './transaction.service';
 import { CreateTransactionDTO } from './dto/create-transaction.dto';
 import { ValidateObjectId } from '../shared/pipes/validate-object-id.pipes';
+import { Aggregator } from 'src/ml-model/aggregator';
 
 @Controller('transaction')
 export class TransactionController {
@@ -23,14 +24,46 @@ export class TransactionController {
   @Post('/transaction')
   async addTransaction(
     @Res() res,
-    @Body() createTransactionDTO: CreateTransactionDTO,
+    @Body() createTransactionDTO: CreateTransactionDTO[],
   ) {
-    const newTransaction = await this.TransactionService.addTransaction(
-      createTransactionDTO,
+    for (let i = 0; i < createTransactionDTO.length; i++) {
+      await this.TransactionService.addTransaction(
+        createTransactionDTO[i],
+      );
+    }
+    
+    const {
+      HOF_SEQ_ID,
+      SUBSCRIBER_SEQ_ID,
+      VISIT_SEQ,
+      HOSPITAL_DOCTOR_ID,
+      HCP_ID,
+    } = createTransactionDTO[0];
+
+    const transactionsForPatientML =
+      await this.TransactionService.getTransactionsByHOFSeqID(HOF_SEQ_ID);
+    const transactionsForDoctorML =
+      await this.TransactionService.getTransactionsByDoctorID(
+        HOSPITAL_DOCTOR_ID,
+        HCP_ID,
+      );
+
+    const newAggregator = new Aggregator();
+    const predictions = newAggregator.getMLPrediction(
+      HOF_SEQ_ID,
+      SUBSCRIBER_SEQ_ID,
+      VISIT_SEQ,
+      HOSPITAL_DOCTOR_ID,
+      HCP_ID,
+      transactionsForPatientML,
+      transactionsForDoctorML,
     );
+
+    // insert new prediction into database ( predictions )
+
     return res.status(HttpStatus.OK).json({
       message: 'Transaction has been submitted successfully!',
-      transaction: newTransaction,
+      transaction: {},
     });
   }
 
@@ -63,7 +96,7 @@ export class TransactionController {
   ) {
     const transactions =
       await this.TransactionService.getTransactionsBySubscriberSeqID(
-        SUBSCRIBER_SEQ_ID
+        SUBSCRIBER_SEQ_ID,
       );
     return res.status(HttpStatus.OK).json(transactions);
   }

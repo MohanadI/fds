@@ -264,8 +264,7 @@ function Main() {
       },
     ];
 
-    for (let i = 0; i < transactions.length; i++) {
-      await TransactionsAPI(transactions[i])
+    await TransactionsAPI(transactions)
         .then((res) => {
           message.success("Transaction have been added!");
           setIsFetching(false);
@@ -274,7 +273,6 @@ function Main() {
           message.error(err.message);
           setIsFetching(false);
         });
-    }
   }
 
   return (

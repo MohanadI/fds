@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
+import * as moment from 'moment';
 import { InjectModel } from '@nestjs/mongoose';
 import { Transaction } from './interfaces/transaction.interface';
 import { CreateTransactionDTO } from './dto/create-transaction.dto';
@@ -35,10 +36,41 @@ export class TransactionService {
     return transactions;
   }
 
+  async getTransactionsByHOFSeqID(HOF_SEQ_ID): Promise<any[]> {
+    const fourMonthsAgo = moment()
+      .subtract(4, 'months')
+      .format('DD/MM/YY HH:MM');
+    const transactions = await this.transactionModel
+      .find({
+        DATE_CREATED: { $gte: fourMonthsAgo },
+        HOF_SEQ_ID: HOF_SEQ_ID,
+      })
+      .exec();
+    return transactions;
+  }
+
+  async getTransactionsByDoctorID(HOSPITAL_DOCTOR_ID, HCP_ID): Promise<any[]> {
+    const fourMonthsAgo = moment()
+      .subtract(4, 'months')
+      .format('DD/MM/YY HH:MM');
+    const transactions = await this.transactionModel
+      .find({
+        DATE_CREATED: { $gte: fourMonthsAgo },
+        HOSPITAL_DOCTOR_ID: HOSPITAL_DOCTOR_ID,
+        HCP_ID: HCP_ID,
+      })
+      .exec();
+    return transactions;
+  }
+
   async getTransactions(): Promise<Transaction[]> {
-    const transactions = await this.transactionModel.find().limit(1000).sort({
-      DATE_CREATED: -1
-    }).exec();
+    const transactions = await this.transactionModel
+      .find()
+      .limit(1000)
+      .sort({
+        DATE_CREATED: -1,
+      })
+      .exec();
     return transactions;
   }
 

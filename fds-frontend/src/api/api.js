@@ -23,11 +23,11 @@ const GetTransactionsListAPI = () =>
     url: `${SERVER_URL}${TRANSACTION_MODULE}${ApiNames.GET_T}`,
   });
 
-const TransactionsAPI = (transaction) => {
+const TransactionsAPI = (transactions) => {
   return axios({
     method: "POST",
     url: `${SERVER_URL}${TRANSACTION_MODULE}${ApiNames.POST_T}`,
-    data: { ...transaction },
+    data: transactions,
   });
 };
 
