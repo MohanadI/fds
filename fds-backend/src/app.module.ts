@@ -6,7 +6,7 @@ import { TransactionModule } from './transaction/transaction.module';
 import { PredictionModule } from './prediction/prediction.module';
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/nest-blog-project', {
+    MongooseModule.forRoot('mongodb://localhost/fds-database', {
       useNewUrlParser: true,
     }),
     TransactionModule,
