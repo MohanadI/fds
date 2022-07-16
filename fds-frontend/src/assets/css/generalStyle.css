@@ -1,10 +1,15 @@
 .ant-layout-header {
   background-color: #202b3d;
   padding: 0;
+  height: 50px;
 }
 .ant-layout-header .ant-menu {
   background-color: #202b3d;
   border-bottom: 0;
+  height: 50px;
+}
+.ant-menu-horizontal > .ant-menu-item, .ant-menu-horizontal > .ant-menu-submenu{
+  top: -4px;
 }
 .ant-layout-content {
   background-color: #ffffff;

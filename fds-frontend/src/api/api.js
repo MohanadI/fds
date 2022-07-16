@@ -24,12 +24,10 @@ const GetTransactionsListAPI = () =>
   });
 
 const TransactionsAPI = (transaction) => {
-  const data = new FormData();
-  data.append("data", { ...transaction });
   return axios({
     method: "POST",
     url: `${SERVER_URL}${TRANSACTION_MODULE}${ApiNames.POST_T}`,
-    data,
+    data: { ...transaction },
   });
 };
 
