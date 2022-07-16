@@ -12,15 +12,13 @@ import {
   Delete,
 } from '@nestjs/common';
 import { PredictionService } from './prediction.service';
-import { TransactionService } from '../transaction/transaction.service';
 import { CreatePredictionDTO } from './dto/create-prediction.dto';
 import { ValidateObjectId } from '../shared/pipes/validate-object-id.pipes';
 
 @Controller('prediction')
 export class PredictionController {
   constructor(
-    private PredictionService: PredictionService,
-    private TransactionService: TransactionService,
+    private PredictionService: PredictionService
   ) {}
 
   // Submit a prediction
@@ -55,13 +53,6 @@ export class PredictionController {
   @Get('predictions')
   async getPredictions(@Res() res) {
     const predictions = await this.PredictionService.getPredictions();
-    for(let i = 0; i < predictions.length; i++) {
-      const transaction =
-      await this.TransactionService.getTransactionsBySubscriberSeqID(
-        predictions[i].SUBSCRIBER_SEQ_ID,
-      );
-      predictions[i].transactions = transaction;
-    }
 
     return res.status(HttpStatus.OK).json(predictions);
   }
