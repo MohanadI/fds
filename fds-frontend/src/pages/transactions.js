@@ -18,6 +18,7 @@ import SideFilters from "../components/side-filters";
 import TimeChart from "../components/TimeChart";
 
 import { GetPredictionsListAPI } from "../api/api";
+import useInterval from "../utils/useInterval";
 
 function Transactions() {
   const { Search } = Input;
@@ -26,6 +27,15 @@ function Transactions() {
 
   const [patientPredictions, setPatientPredictions] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
+
+  useEffect(() => {
+    fetchPatientPredictions();
+  }, []);
+
+  useInterval(() => {
+    setIsFetching(true);
+    fetchPatientPredictions();
+  }, 60 * 1000);
 
   async function fetchPatientPredictions() {
     await GetPredictionsListAPI()
@@ -39,10 +49,6 @@ function Transactions() {
         setIsFetching(false);
       });
   }
-
-  useEffect(() => {
-    fetchPatientPredictions();
-  }, []);
 
   const columns = [
     {
@@ -106,7 +112,10 @@ function Transactions() {
             <Panel header="Show transaction details" key="1">
               {description.map((item, index) => {
                 return (
-                  <Paragraph key={index} style={{ fontSize: "12px" }}>
+                  <Paragraph
+                    key={record.SUBSCRIBER_SEQ_ID}
+                    style={{ fontSize: "12px" }}
+                  >
                     {item}
                   </Paragraph>
                 );
@@ -153,7 +162,7 @@ function Transactions() {
           <Col span={20}>
             {/* per minute */}
             {/* build create data by time interval */}
-            <TimeChart data={patientPredictions}/>
+            <TimeChart data={patientPredictions} />
             <Divider />
             <Table columns={columns} dataSource={patientPredictions} />
           </Col>

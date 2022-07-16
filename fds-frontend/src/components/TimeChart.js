@@ -23,7 +23,7 @@ else -> normal(0)
     return 0.5;
   });
 
-  console.log(finalTransactions, "finalTransactions");
+  // console.log(finalTransactions, "finalTransactions");
 
   let options = {
     chart: {
@@ -120,7 +120,7 @@ else -> normal(0)
         marker: {
           enabled: false,
         },
-        pointInterval: 3600000, // one hour
+        pointInterval: 36000, // one hour
         pointStart: Date.UTC(2019, 1, 13, 0, 0, 0),
       },
     },
