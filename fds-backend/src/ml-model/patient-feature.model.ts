@@ -1,11 +1,11 @@
 export class PatientFeatures {
-    ThrCodeMax: string;
+    ThrCodeMax: number;
     AGE: string;
-    CITY: string;
-    maxSUBVisitsSameDoctor: string;
-    number_of_visit_per_year: string;
-    Avgnumber_of_act: string;
-    avgSumClaimPerYear: string;
-    avgSumClaimPerVisit: string;
-    avgTimeDiff: string;
+    CITY: number;
+    maxSUBVisitsSameDoctor: number;
+    number_of_visit_per_year: number;
+    Avgnumber_of_act: number;
+    avgSumClaimPerYear: number;
+    avgSumClaimPerVisit: number;
+    avgTimeDiff: number;
 }
