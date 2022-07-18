@@ -1,5 +1,6 @@
 import { DoctorFeatures } from './doctor-feature.model';
 import { PatientFeatures } from './patient-feature.model';
+import axios from "axios";
 
 export class Aggregator {
   constructor() { }
@@ -13,13 +14,13 @@ export class Aggregator {
     transactionsForPatientML,
     transactionsForDoctorML,
   ) {
-    let pateintFeatures: PatientFeatures = await this.getPatientFeaturesValues(
+    let pateintFeatures: PatientFeatures = this.getPatientFeaturesValues(
       transactionsForPatientML,
       hofSeq,
       subSeq,
       visitSeq
     );
-    let doctorFeatures: DoctorFeatures = await this.getDoctorFeaturesValues(
+    let doctorFeatures: DoctorFeatures = this.getDoctorFeaturesValues(
       transactionsForDoctorML,
       hospitalDoctorId,
       hcpId
@@ -27,6 +28,12 @@ export class Aggregator {
 
     //**************************************** Patient Model **************************************** */
     console.log(transactionsForPatientML);
+
+    let patientResult = await axios({
+      method: "POST",
+      url: `http://127.0.0.1:9001/predict`,
+      data: pateintFeatures,
+    });
     // call patient AI api
     //127.0.0.1:9001/predict
     /**
@@ -49,6 +56,12 @@ export class Aggregator {
 
     //**************************************** Doctor model **************************************** */
     console.log(transactionsForDoctorML);
+
+    let doctorResult = await axios({
+      method: "POST",
+      url: `http://127.0.0.1:9002/predict`,
+      data: doctorFeatures,
+    });
     // call doctor AI api
     //127.0.0.1:9002/predict
     /**
@@ -65,7 +78,10 @@ export class Aggregator {
             }
         */
     //**************************************** End Doctor model **************************************** */
-
+    return {
+      patientResult,
+      doctorResult
+    }
     // save to predicitons table (visit, sub, doctorClustor, patientCluster, dateCreated)
   }
 
@@ -84,7 +100,7 @@ export class Aggregator {
       acc['a' + curr.VISIT_SEQ].push(curr);
       return acc;
     }, {});
-    
+
     let Avgnumber_of_act = subscriberActivities.length / Object.keys(subscriberVisits).length;
     console.log('Avgnumber_of_act', Avgnumber_of_act);
     //*  total cost per year
@@ -101,7 +117,7 @@ export class Aggregator {
     console.log('avgSumClaimPerVisit', avgSumClaimPerVisit);
     //*  avg count of occurences for THR_CODE
     //*      filter for sub_seq and count each THR_code and get max * 3
-    
+
     const thrCodes = subscriberActivities.reduce((acc, curr) => {
       if (curr.THR_CODE) {
         if (!acc[curr.THR_CODE]) acc[curr.THR_CODE] = []; //If this type wasn't previously stored
@@ -113,14 +129,14 @@ export class Aggregator {
     for (const key in thrCodes) {
       if (Object.prototype.hasOwnProperty.call(thrCodes, key)) {
         const element = thrCodes[key];
-        ThrCodeMax = Math.max(element.length, ThrCodeMax);        
+        ThrCodeMax = Math.max(element.length, ThrCodeMax);
       }
     }
     ThrCodeMax = ThrCodeMax * 3;
     console.log('ThrCodeMax', ThrCodeMax);
     //*  الفرق الزمني بين الزيارات لنفس العائله
     //*      group by visit(sub and visit) and order it and then calulate avg of differences
-    
+
     const hofVisits = subscriberActivities.reduce((acc, curr) => {
       let hofKey = 'v' + curr.VISIT_SEQ + 's' + curr.SUBSCRIBER_SEQ_ID;
       if (!acc[hofKey]) acc[hofKey] = []; //If this type wasn't previously stored
@@ -133,7 +149,7 @@ export class Aggregator {
       let dateCreated = hofVisits[key][0].DATE_CREATED;
       if (prevDateCreated) {
         let millis = (new Date(dateCreated)).getTime() - (new Date(prevDateCreated)).getTime();
-        timediff += Math.floor(millis/60/60/24);
+        timediff += Math.floor(millis / 60 / 60 / 24);
       }
       prevDateCreated = dateCreated
     }
@@ -152,12 +168,12 @@ export class Aggregator {
         doctorVisits[hcpKey].push(doctorActivity);
       }
     }
-    
+
     let doctorVisitsMax = 0;
     for (const key in doctorVisits) {
       if (Object.prototype.hasOwnProperty.call(doctorVisits, key)) {
         const element = doctorVisits[key];
-        doctorVisitsMax = Math.max(element.length, doctorVisitsMax);        
+        doctorVisitsMax = Math.max(element.length, doctorVisitsMax);
       }
     }
     let maxSUBVisitsSameDoctor = doctorVisitsMax * 3;
@@ -169,15 +185,15 @@ export class Aggregator {
       'Deir Al Balah',
       'Rafah',
       'Gaza'].indexOf(transactionsForPatientML[0].CITY) >= 0 ? 0 : 1;
-      console.log('CITY', CITY);
+    console.log('CITY', CITY);
     //*  AGE
     //*      simple for last visit for the subscriber
     let AGE = transactionsForPatientML[0].AGE;
-      console.log('AGE', AGE);
+    console.log('AGE', AGE);
     return {
       number_of_visit_per_year,
       Avgnumber_of_act,
-      avgSumClaimPerYear,      
+      avgSumClaimPerYear,
       avgSumClaimPerVisit,
       ThrCodeMax,
       avgTimeDiff,
@@ -203,7 +219,7 @@ export class Aggregator {
     for (const key in thrCodes) {
       if (Object.prototype.hasOwnProperty.call(thrCodes, key)) {
         const element = thrCodes[key];
-        ThrCodeMax = Math.max(element.length, ThrCodeMax);        
+        ThrCodeMax = Math.max(element.length, ThrCodeMax);
       }
     }
     ThrCodeMax = ThrCodeMax * 3;
@@ -222,7 +238,7 @@ export class Aggregator {
 
     // *   average cost per visit
     // *       filter for HospitalDoctorId and HcpId and get avg cost of visits
-    
+
     let totalCost = transactionsForDoctorML.reduce((acc, curr) => {
       acc += curr.CLAIMED_VALUE;
     }, 0);
