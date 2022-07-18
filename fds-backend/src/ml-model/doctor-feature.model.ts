@@ -1,8 +1,8 @@
 export class DoctorFeatures {
-    ThrCodeMax: string;
-    Avgnumber_of_act: string;
-    avgSumClaim: string;
-    max_Doctor_visit_peryear: string;
-    medAvg: string;
-    avgSubscriberDoctorCost: string;
+    ThrCodeMax: number;
+    Avgnumber_of_act: number;
+    avgSumClaim: number;
+    max_Doctor_visit_peryear: number;
+    medAvg: number;
+    avgSubscriberDoctorCost: number;
 }
