@@ -17,9 +17,7 @@ export class Aggregator {
       transactionsForPatientML,
       hofSeq,
       subSeq,
-      visitSeq,
-      hospitalDoctorId,
-      hcpId
+      visitSeq
     );
     let doctorFeatures: DoctorFeatures = await this.getDoctorFeaturesValues(
       transactionsForDoctorML,
