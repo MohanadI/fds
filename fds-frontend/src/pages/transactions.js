@@ -23,9 +23,9 @@ import useInterval from "../utils/useInterval";
 function Transactions() {
   const { Search } = Input;
   const { Panel } = Collapse;
-  const { Title, Paragraph } = Typography;
+  const { Title } = Typography;
 
-  const [patientPredictions, setPatientPredictions] = useState([]);
+  const [predictions, setPredictions] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ function Transactions() {
   async function fetchPatientPredictions() {
     await GetPredictionsListAPI()
       .then((res) => {
-        setPatientPredictions(res.data);
+        setPredictions(res.data);
         message.success("Successfully fetched transactions");
         setIsFetching(false);
       })
@@ -58,68 +58,26 @@ function Transactions() {
       render: (text, record) => record.SUBSCRIBER_SEQ_ID,
     },
     {
+      title: "VISIT SEQ",
+      dataIndex: "VISIT_SEQ",
+      key: "VISIT_SEQ",
+      render: (text, record) => record.VISIT_SEQ,
+    },
+    {
       title: "DATE_CREATED",
       dataIndex: "DATE_CREATED",
       key: "DATE_CREATED",
-      render: (text, record) => {
-        if (record.transactions.length > 0) {
-          return record.transactions[0]["DATE_CREATED"];
-        } else {
-          return " - ";
-        }
-      },
-    },
-    {
-      title: "HCP ID",
-      key: "HCP_ID",
-      render: (text, record) => {
-        if (record.transactions.length > 0) {
-          return record.transactions[0]["HCP_ID"];
-        } else {
-          return " - ";
-        }
-      },
-    },
-    {
-      title: "CITY",
-      dataIndex: "CITY",
-      key: "CITY",
-      render: (text, record) => {
-        if (record.transactions.length > 0) {
-          return record.transactions[0]["CITY"];
-        } else {
-          return " - ";
-        }
-      },
+      render: (text, record) => record.DATE_CREATED,
     },
     {
       title: "DETAILS",
       dataIndex: "details",
       key: "details",
       render: (text, record) => {
-        let description = [];
-        if (record.transactions.length > 0) {
-          description.push(
-            "ICD9 Description :" + record.transactions[0]["ICD-9 Description"]
-          );
-          description.push(
-            "PAYMENT TYPE :" + record.transactions[0]["PAYMENT_TYPE"]
-          );
-          description.push("UNIT TYPE :" + record.transactions[0]["UNIT_TYPE"]);
-        }
         return (
           <Collapse defaultActiveKey={["0"]} style={{ width: "300px" }}>
             <Panel header="Show transaction details" key="1">
-              {description.map((item, index) => {
-                return (
-                  <Paragraph
-                    key={record.SUBSCRIBER_SEQ_ID}
-                    style={{ fontSize: "12px" }}
-                  >
-                    {item}
-                  </Paragraph>
-                );
-              })}
+              Hello
             </Panel>
           </Collapse>
         );
@@ -162,9 +120,9 @@ function Transactions() {
           <Col span={20}>
             {/* per minute */}
             {/* build create data by time interval */}
-            <TimeChart data={patientPredictions} />
+            <TimeChart data={predictions} />
             <Divider />
-            <Table columns={columns} dataSource={patientPredictions} />
+            <Table columns={columns} dataSource={predictions} />
           </Col>
         </Row>
       </Spin>
