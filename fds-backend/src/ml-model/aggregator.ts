@@ -2,7 +2,7 @@ import { DoctorFeatures } from './doctor-feature.model';
 import { PatientFeatures } from './patient-feature.model';
 
 export class Aggregator {
-  constructor() {}
+  constructor() { }
 
   async getMLPrediction(
     hofSeq,
@@ -14,13 +14,17 @@ export class Aggregator {
     transactionsForDoctorML,
   ) {
     let pateintFeatures: PatientFeatures = await this.getPatientFeaturesValues(
+      transactionsForPatientML,
       hofSeq,
       subSeq,
       visitSeq,
+      hospitalDoctorId,
+      hcpId
     );
     let doctorFeatures: DoctorFeatures = await this.getDoctorFeaturesValues(
+      transactionsForDoctorML,
       hospitalDoctorId,
-      hcpId,
+      hcpId
     );
 
     //**************************************** Patient Model **************************************** */
@@ -67,43 +71,117 @@ export class Aggregator {
     // save to predicitons table (visit, sub, doctorClustor, patientCluster, dateCreated)
   }
 
-  async getPatientFeaturesValues(hofSeq, subSeq, visitSeq) {
+  async getPatientFeaturesValues(transactionsForPatientML, hofSeq, subSeq, visitSeq) {
+
+    let subscriberActivities = transactionsForPatientML.filter(item => item.SUBSCRIBER_SEQ_ID == subSeq);
     //calculate patient features
-    /**
-     * query to get last month  min and max date for HOF sequence
-     *  number of visits per year
-     *     filter for sub_seq and group by visit seq and sub sequence * 12
-     *  number of activities per visit
-     *      filter for sub_seq and get avg number of visits
-     *  total cost per year
-     *      filter for sub_seq and get total * 12
-     *  average cost per visit
-     *      filter for sub_seq and get avg cost of visits
-     *  avg count of occurences for THR_CODE
-     *      filter for sub_seq and count each THR_code and get max * 12
-     *  الفرق الزمني بين الزيارات لنفس العائله
-     *      group by visit(sub and visit) and order it and then calulate avg of differences
-     *  عدد الزيارات نفس العائله لنفس الدكتور
-     *      group by visit(sub and visit) and then count for each doctor and get max
-     *  isWestbank or Gaza
-     *      simple for last visit for the subscriber
-     *  AGE
-     *      simple for last visit for the subscriber
-     */
+    //*  number of visits per year
+    //*     filter for sub_seq and group by visit seq and sub sequence * 3
+    let number_of_visit_per_year = [...(new Set(subscriberActivities.map(item => item.VISIT_SEQ)))].length * 3;
+    console.log('number_of_visit_per_year', number_of_visit_per_year)
+    //*  number of activities per visit
+    //*      filter for sub_seq and get avg number of visits
+    const subscriberVisits = subscriberActivities.reduce((acc, curr) => {
+      if (!acc['a' + curr.VISIT_SEQ]) acc['a' + curr.VISIT_SEQ] = []; //If this type wasn't previously stored
+      acc['a' + curr.VISIT_SEQ].push(curr);
+      return acc;
+    }, {});
+    
+    let Avgnumber_of_act = subscriberActivities.length / Object.keys(subscriberVisits).length;
+    console.log('Avgnumber_of_act', Avgnumber_of_act);
+    //*  total cost per year
+    //*      filter for sub_seq and get total * 3
+    let totalCost = subscriberActivities.reduce((acc, curr) => {
+      acc += curr.CLAIMED_VALUE;
+    }, 0);
+    let avgSumClaimPerYear = totalCost * 3;
+    console.log('avgSumClaimPerYear', avgSumClaimPerYear);
+
+    //*  average cost per visit
+    //*      filter for sub_seq and get avg cost of visits
+    let avgSumClaimPerVisit = totalCost / Object.keys(subscriberVisits).length;
+    console.log('avgSumClaimPerVisit', avgSumClaimPerVisit);
+    //*  avg count of occurences for THR_CODE
+    //*      filter for sub_seq and count each THR_code and get max * 3
+    
+    const thrCodes = subscriberActivities.reduce((acc, curr) => {
+      if (curr.THR_CODE) {
+        if (!acc[curr.THR_CODE]) acc[curr.THR_CODE] = []; //If this type wasn't previously stored
+        acc[curr.THR_CODE].push(curr);
+      }
+      return acc;
+    }, {});
+    let ThrCodeMax = 0;
+    for (const key in thrCodes) {
+      if (Object.prototype.hasOwnProperty.call(thrCodes, key)) {
+        const element = thrCodes[key];
+        ThrCodeMax = Math.max(element.length, ThrCodeMax);        
+      }
+    }
+    ThrCodeMax = ThrCodeMax * 3;
+    console.log('ThrCodeMax', ThrCodeMax);
+    //*  الفرق الزمني بين الزيارات لنفس العائله
+    //*      group by visit(sub and visit) and order it and then calulate avg of differences
+    
+    const hofVisits = subscriberActivities.reduce((acc, curr) => {
+      let hofKey = 'v' + curr.VISIT_SEQ + 's' + curr.SUBSCRIBER_SEQ_ID;
+      if (!acc[hofKey]) acc[hofKey] = []; //If this type wasn't previously stored
+      acc[hofKey].push(curr);
+      return acc;
+    }, {});
+    let timediff = 0;
+    let prevDateCreated = 0;
+    for (let key in hofVisits) {
+      let dateCreated = hofVisits[key][0].DATE_CREATED;
+      if (prevDateCreated) {
+        let millis = (new Date(dateCreated)).getTime() - (new Date(prevDateCreated)).getTime();
+        timediff += Math.floor(millis/60/60/24);
+      }
+      prevDateCreated = dateCreated
+    }
+    let avgTimeDiff = timediff / (hofVisits.length - 1);
+    console.log(avgTimeDiff);
+    //*  عدد الزيارات نفس العائله لنفس الدكتور
+    //*      group by visit(sub and visit) and then count for each doctor and get max * 3
+    let doctorVisits: any = {};
+    for (let key in hofVisits) {
+      let doctorActivity = hofVisits[key].find(item => {
+        return ['Emergency Center', 'Doctor'].indexOf(item.HCP_Type) >= 0;
+      })
+      if (doctorActivity) {
+        let hcpKey = 'l' + doctorActivity.HOSPITAL_DOCTOR_ID + 'p' + doctorActivity.HCP_ID;
+        if (!doctorVisits[hcpKey]) doctorVisits[hcpKey] = []; //If this type wasn't previously stored
+        doctorVisits[hcpKey].push(doctorActivity);
+      }
+    }
+    
+    let doctorVisitsMax = 0;
+    for (const key in doctorVisits) {
+      if (Object.prototype.hasOwnProperty.call(doctorVisits, key)) {
+        const element = doctorVisits[key];
+        doctorVisitsMax = Math.max(element.length, doctorVisitsMax);        
+      }
+    }
+    let maxSUBVisitsSameDoctor = doctorVisitsMax * 3;
+    //*  isWestbank or Gaza
+    //*      simple for last visit for the subscriber
+    //*  AGE
+    //*      simple for last visit for the subscriber
+
     return new PatientFeatures();
   }
 
-  getDoctorFeaturesValues(hospitalDoctorId, hcpId) {
+  getDoctorFeaturesValues(transactionsForDoctorML, hospitalDoctorId, hcpId) {
     // calculate doctor features
     /**
      *   avg count of occurences for THR_CODE
-     *      filter for HospitalDoctorId and HCP_ID and count each THR_code and get max * 12
+     *      filter for HospitalDoctorId and HCP_ID and count each THR_code and get max * 3
      *   number of activities per visit
      *      filter for HospitalDoctorId and HcpId and get avg number of visits
      *   average cost per visit
      *       filter for HospitalDoctorId and HcpId and get avg cost of visits
      *   avg visits per year
-     *       filter for HospitalDoctorId and HcpId and group by visit seq and subSequenceId * 12
+     *       filter for HospitalDoctorId and HcpId and group by visit seq and subSequenceId * 3
      *   avg count of medicines prescriped by doctor per visit (pharmacy)
      *       group by visit(sub and visit) and filter for pharmacy only and get avg
      *   avg cost for doctor per patient(not visit)
