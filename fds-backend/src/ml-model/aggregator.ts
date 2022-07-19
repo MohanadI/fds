@@ -33,24 +33,6 @@ export class Aggregator {
       url: `http://127.0.0.1:9001/predict`,
       data: [pateintFeatures],
     });
-    // call patient AI api
-    //127.0.0.1:9001/predict
-    /**
-            "ThrCodeMax"
-            "AGE"
-            "CITY"
-            "maxSUBVisitsSameDoctor"
-            "number_of_visit_per_year"
-            "Avgnumber_of_act"
-            "avgSumClaimPerYear"
-            "avgSumClaimPerVisit"
-            "avgTimeDiff"
-        */
-    /**
-        * response: {
-                "prediction": "[2]"
-            }
-        */
     //**************************************** End Patient model **************************************** */
 
     //**************************************** Doctor model **************************************** */
@@ -60,21 +42,6 @@ export class Aggregator {
       url: `http://127.0.0.1:9002/predict`,
       data: [doctorFeatures],
     });
-    // call doctor AI api
-    //127.0.0.1:9002/predict
-    /**
-            ThrCodeMax
-            Avgnumber_of_act
-            avgSumClaim
-            max_Doctor_visit_peryear
-            medAvg
-            avgSubscriberDoctorCost
-         */
-    /**
-        * response: {
-                "prediction": "[2]"
-            }
-        */
     //**************************************** End Doctor model **************************************** */
     return {
       patientResult,
@@ -114,6 +81,7 @@ export class Aggregator {
     //*      filter for sub_seq and get total * 3
     let totalCost = subscriberActivities.reduce((acc, curr) => {
       acc += curr.CLAIMED_VALUE;
+      return acc;
     }, 0);
     let avgSumClaimPerYear = totalCost * 3;
 
@@ -160,7 +128,10 @@ export class Aggregator {
       }
       prevDateCreated = dateCreated;
     }
-    let avgTimeDiff = timediff / (hofVisits.length - 1);
+    let avgTimeDiff = 365;
+    if (hofVisits.length > 1) {
+      avgTimeDiff = timediff / (hofVisits.length - 1);
+    }
 
     //*  عدد الزيارات نفس العائله لنفس الدكتور
     //*      group by visit(sub and visit) and then count for each doctor and get max * 3
@@ -254,6 +225,7 @@ export class Aggregator {
 
     let totalCost = transactionsForDoctorML.reduce((acc, curr) => {
       acc += curr.CLAIMED_VALUE;
+      return acc;
     }, 0);
     let avgSumClaim = totalCost / Object.keys(subscriberVisits).length;
 
@@ -280,9 +252,13 @@ export class Aggregator {
     //todo(neirat): should we multiply by 3?
     let totalCostOfDoctorProcedures = doctorProcedures.reduce((acc, curr) => {
       acc += curr.CLAIMED_VALUE;
+      return acc;
     }, 0);
-    let avgSubscriberDoctorCost =
-      totalCostOfDoctorProcedures / numberOfSubscribers;
+    let avgSubscriberDoctorCost = 0;
+    if (numberOfSubscribers) {
+      avgSubscriberDoctorCost =
+        totalCostOfDoctorProcedures / numberOfSubscribers;
+    }
 
     return {
       ThrCodeMax,
