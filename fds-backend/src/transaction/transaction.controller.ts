@@ -36,6 +36,7 @@ export class TransactionController {
       VISIT_SEQ,
       HOSPITAL_DOCTOR_ID,
       HCP_ID,
+      DATE_CREATED
     } = createTransactionDTO[0];
 
     const transactionsForPatientML =
@@ -57,9 +58,25 @@ export class TransactionController {
       transactionsForDoctorML,
     );
 
-    // console.log(" --------------------- ")
-    // console.log("predictions");
-    // console.log(predictions);
+    const patientCluster = predictions.patientResult?.data?.cluster;
+    const doctorCluster = predictions.patientResult?.data?.cluster;
+
+    const patientPrediction = patientCluster === '0' ? 'N' : 'Y';
+    const doctorPrediction = doctorCluster === '0' ? 'N' : 'Y';
+
+    const predictionToInsert = {
+      SUBSCRIBER_SEQ_ID: SUBSCRIBER_SEQ_ID,
+      VISIT_SEQ: VISIT_SEQ,
+      DOCTOR_CLUSTER: doctorCluster,
+      PATIENT_CLUSTER: patientCluster,
+      DOCTOR_CLUSTER_PREDICTION: doctorPrediction,
+      PATIENT_CLUSTER_PREDICTION: patientPrediction,
+      DATE_CREATED: DATE_CREATED,
+    };
+
+    console.log(' --------------------- ');
+    console.log(predictionToInsert);
+    console.log(' --------------------- ');
     // insert new prediction into database ( predictions )
 
     return res.status(HttpStatus.OK).json({
