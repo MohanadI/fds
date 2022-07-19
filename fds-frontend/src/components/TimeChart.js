@@ -9,19 +9,19 @@ function TimeChart(predictions) {
 6-> waste (1)
 else -> normal(0)
   */
-  const finalTransactions = predictions.data.map((prediction) => {
-    if (prediction["Scaled Cluster"] === "0") {
-      return 3.5;
-    } else if (
-      prediction["Scaled Cluster"] === "1" ||
-      prediction["Scaled Cluster"] === "4"
-    ) {
-      return 2.5;
-    } else if (prediction["Scaled Cluster"] === "5") {
-      return 1.5;
-    }
-    return 0.5;
-  });
+  // const finalTransactions = predictions.data.map((prediction) => {
+  //   if (prediction["Scaled Cluster"] === "0") {
+  //     return 3.5;
+  //   } else if (
+  //     prediction["Scaled Cluster"] === "1" ||
+  //     prediction["Scaled Cluster"] === "4"
+  //   ) {
+  //     return 2.5;
+  //   } else if (prediction["Scaled Cluster"] === "5") {
+  //     return 1.5;
+  //   }
+  //   return 0.5;
+  // });
 
   // console.log(finalTransactions, "finalTransactions");
 
@@ -127,7 +127,7 @@ else -> normal(0)
     series: [
       {
         name: "Transaction",
-        data: finalTransactions,
+        data: predictions,
       },
     ],
     navigation: {

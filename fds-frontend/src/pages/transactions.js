@@ -25,7 +25,12 @@ function Transactions() {
   const { Panel } = Collapse;
   const { Title } = Typography;
 
-  const [predictions, setPredictions] = useState([]);
+  const [predictions, setPredictions] = useState([{
+    id: 1,
+    SUBSCRIBER_SEQ_ID: "1",
+    VISIT_SEQ: "1",
+    DATE_CREATED: "2020-01-01"
+  }]);
   const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
@@ -40,7 +45,9 @@ function Transactions() {
   async function fetchPatientPredictions() {
     await GetPredictionsListAPI()
       .then((res) => {
-        setPredictions(res.data);
+        if(res.length > 0) {
+          setPredictions(res.data);
+        }
         message.success("Successfully fetched transactions");
         setIsFetching(false);
       })

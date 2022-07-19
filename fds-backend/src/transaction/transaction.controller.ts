@@ -27,11 +27,9 @@ export class TransactionController {
     @Body() createTransactionDTO: CreateTransactionDTO[],
   ) {
     for (let i = 0; i < createTransactionDTO.length; i++) {
-      await this.TransactionService.addTransaction(
-        createTransactionDTO[i],
-      );
+      await this.TransactionService.addTransaction(createTransactionDTO[i]);
     }
-    
+
     const {
       HOF_SEQ_ID,
       SUBSCRIBER_SEQ_ID,
@@ -49,7 +47,7 @@ export class TransactionController {
       );
 
     const newAggregator = new Aggregator();
-    const predictions = newAggregator.getMLPrediction(
+    const predictions = await newAggregator.getMLPrediction(
       HOF_SEQ_ID,
       SUBSCRIBER_SEQ_ID,
       VISIT_SEQ,
@@ -59,6 +57,9 @@ export class TransactionController {
       transactionsForDoctorML,
     );
 
+    // console.log(" --------------------- ")
+    // console.log("predictions");
+    // console.log(predictions);
     // insert new prediction into database ( predictions )
 
     return res.status(HttpStatus.OK).json({
