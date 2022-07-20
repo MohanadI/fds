@@ -12,5 +12,6 @@ import { PredictionSchema } from './schemas/prediction.schema';
   ], // add
   providers: [PredictionService],
   controllers: [PredictionController],
+  exports: [PredictionService],
 })
 export class PredictionModule {}

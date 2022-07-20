@@ -13,6 +13,7 @@ axios.defaults.withCredentials = false;
 const ApiNames = Object.freeze({
   POST_T: "Transaction",
   GET_T: "Transactions",
+  GET_TRANSACTION_BY_SSI_AND_VI: "transactionsBySSIAndVI",
   POST_P: "Prediction",
   GET_P: "Predictions",
 });
@@ -21,6 +22,12 @@ const GetTransactionsListAPI = () =>
   axios({
     method: "GET",
     url: `${SERVER_URL}${TRANSACTION_MODULE}${ApiNames.GET_T}`,
+  });
+
+const GetTransactionsListBySubSeqAndVisitSeqAPI = (subSeq, visitSeq) =>
+  axios({
+    method: "GET",
+    url: `${SERVER_URL}${TRANSACTION_MODULE}${ApiNames.GET_TRANSACTION_BY_SSI_AND_VI}/${subSeq}/${visitSeq}`,
   });
 
 const TransactionsAPI = (transactions) => {
@@ -51,5 +58,6 @@ export {
   PredictionAPI,
   GetPredictionsListAPI,
   GetTransactionsListAPI,
+  GetTransactionsListBySubSeqAndVisitSeqAPI,
   TransactionsAPI,
 };

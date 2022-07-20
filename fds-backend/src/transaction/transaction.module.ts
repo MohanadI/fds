@@ -3,9 +3,11 @@ import { TransactionService } from './transaction.service';
 import { TransactionController } from './transaction.controller';
 import { MongooseModule } from '@nestjs/mongoose'; // add this
 import { TransactionSchema } from './schemas/transaction.schema'; // and this
+import { PredictionModule } from 'src/prediction/prediction.module';
 
 @Module({
   imports: [
+    PredictionModule,
     MongooseModule.forFeature([
       { name: 'Transaction', schema: TransactionSchema },
     ]),

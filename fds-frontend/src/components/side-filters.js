@@ -174,7 +174,30 @@ function SideFilters() {
         </Select>
       </div>
       <div className="filter-container">
-        <div className="filter-title">{"intensity scale".toUpperCase()}</div>
+        <div className="filter-title">{"patient intensity scale".toUpperCase()}</div>
+        <div>
+          <Checkbox>
+            <Tag color="red">Fraud</Tag>
+          </Checkbox>
+        </div>
+        <div style={{ marginTop: 5 }}>
+          <Checkbox>
+            <Tag color="orange">Abuse</Tag>
+          </Checkbox>
+        </div>
+        <div style={{ marginTop: 5 }}>
+          <Checkbox>
+            <Tag color="green">Waste</Tag>
+          </Checkbox>
+        </div>
+        <div style={{ marginTop: 5 }}>
+          <Checkbox>
+            <Tag color="blue">Normal</Tag>
+          </Checkbox>
+        </div>
+      </div>
+      <div className="filter-container">
+        <div className="filter-title">{"doctor intensity scale".toUpperCase()}</div>
         <div>
           <Checkbox>
             <Tag color="red">Fraud</Tag>

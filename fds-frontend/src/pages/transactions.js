@@ -9,15 +9,20 @@ import {
   Collapse,
   message,
   Spin,
+  Tag,
+  Timeline,
 } from "antd";
 // import moment from "moment";
 import { SearchOutlined } from "@ant-design/icons";
 import PickerWithType from "../components/PickerWithType";
 
 import SideFilters from "../components/side-filters";
-import TimeChart from "../components/TimeChart";
+// import TimeChart from "../components/TimeChart";
 
-import { GetPredictionsListAPI } from "../api/api";
+import {
+  GetPredictionsListAPI,
+  GetTransactionsListBySubSeqAndVisitSeqAPI,
+} from "../api/api";
 import useInterval from "../utils/useInterval";
 
 function Transactions() {
@@ -25,66 +30,178 @@ function Transactions() {
   const { Panel } = Collapse;
   const { Title } = Typography;
 
-  const [predictions, setPredictions] = useState([{
-    id: 1,
-    SUBSCRIBER_SEQ_ID: "1",
-    VISIT_SEQ: "1",
-    DATE_CREATED: "2020-01-01"
-  }]);
+  const [predictions, setPredictions] = useState([]);
+  const [currentTransactions, setCurrentTransactions] = useState([]);
+  const [selectedTransaction, setSelectedTransaction] = useState({});
   const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
+    console.log("----------------------------------");
+    console.log("fetchPatientPredictions: useEffect()");
     fetchPatientPredictions();
   }, []);
 
+  useEffect(() => {
+    console.log("----------------------------------");
+    console.log("selectedTransaction:", selectedTransaction);
+    if (selectedTransaction.SUBSCRIBER_SEQ_ID) {
+      getTransactionListBySeqAndVisit(
+        selectedTransaction.SUBSCRIBER_SEQ_ID,
+        selectedTransaction.VISIT_SEQ
+      );
+    }
+  }, [selectedTransaction]);
+
   useInterval(() => {
-    setIsFetching(true);
     fetchPatientPredictions();
   }, 60 * 1000);
 
   async function fetchPatientPredictions() {
-    await GetPredictionsListAPI()
-      .then((res) => {
-        if(res.length > 0) {
-          setPredictions(res.data);
-        }
-        message.success("Successfully fetched transactions");
-        setIsFetching(false);
-      })
-      .catch((err) => {
-        message.error(err.message);
-        setIsFetching(false);
-      });
+    setIsFetching(true);
+    try {
+      await GetPredictionsListAPI()
+        .then((res) => {
+          if (res && res.data.length > 0) {
+            setPredictions(res.data);
+          }
+          message.success("Successfully fetched predictions");
+          setIsFetching(false);
+        })
+        .catch((err) => {
+          message.error(err.message);
+          setIsFetching(false);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function getTransactionListBySeqAndVisit(subSeq, visitSeq) {
+    setIsFetching(true);
+    try {
+      await GetTransactionsListBySubSeqAndVisitSeqAPI(subSeq, visitSeq)
+        .then((res) => {
+          if (res && res.data.length > 0) {
+            setCurrentTransactions(res.data);
+          }
+          message.success("Successfully fetched transactions");
+          setIsFetching(false);
+        })
+        .catch((err) => {
+          message.error(err.message);
+          setIsFetching(false);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function getPredictionTag(prediction) {
+    if (prediction === "Fraud") {
+      return {
+        color: "red",
+        text: "Fraud",
+      };
+    } else if (prediction === "Abuse") {
+      return {
+        color: "orange",
+        text: "Abuse",
+      };
+    } else if (prediction === "waste") {
+      return {
+        color: "green",
+        text: "Waste",
+      };
+    }
+    return {
+      color: "blue",
+      text: "Normal",
+    };
   }
 
   const columns = [
     {
-      title: "PATIENT ID",
+      title: "Patient ID",
       dataIndex: "SUBSCRIBER_SEQ_ID",
       key: "SUBSCRIBER_SEQ_ID",
       render: (text, record) => record.SUBSCRIBER_SEQ_ID,
     },
     {
-      title: "VISIT SEQ",
+      title: "Visit Sequence",
       dataIndex: "VISIT_SEQ",
       key: "VISIT_SEQ",
       render: (text, record) => record.VISIT_SEQ,
     },
     {
-      title: "DATE_CREATED",
+      title: "Created Date",
       dataIndex: "DATE_CREATED",
       key: "DATE_CREATED",
       render: (text, record) => record.DATE_CREATED,
     },
     {
-      title: "DETAILS",
+      title: "Doctor Prediction",
+      dataIndex: "DOCTOR_PREDICTION",
+      key: "DOCTOR_PREDICTION",
+      render: (text, record) => {
+        const prediction = getPredictionTag(record.DOCTOR_CLUSTER_PREDICTION);
+
+        return <Tag color={prediction.color}>{prediction.text}</Tag>;
+      },
+    },
+    {
+      title: "Patient Prediction",
+      dataIndex: "PATIENT_PREDICTION",
+      key: "PATIENT_PREDICTION",
+      render: (text, record) => {
+        const prediction = getPredictionTag(record.PATIENT_CLUSTER_PREDICTION);
+
+        return <Tag color={prediction.color}>{prediction.text}</Tag>;
+      },
+    },
+    {
+      title: "Details",
       dataIndex: "details",
       key: "details",
       render: (text, record) => {
         return (
-          <Collapse defaultActiveKey={["0"]} style={{ width: "300px" }}>
-            <Panel header="Show transaction details" key="1">
-              Hello
+          <Collapse
+            style={{ width: "400px" }}
+            onChange={(key) => {
+              if (key.length !== 0) {
+                setSelectedTransaction({
+                  SUBSCRIBER_SEQ_ID: record.SUBSCRIBER_SEQ_ID,
+                  VISIT_SEQ: record.VISIT_SEQ,
+                });
+              }
+            }}
+          >
+            <Panel header="Show transaction details" key={record._id}>
+              <Title style={{ fontSize: 14, marginBottom: 15 }}>
+                Transaction Procedures:{" "}
+              </Title>
+              {currentTransactions &&
+                currentTransactions.length > 0 &&
+                currentTransactions.map((transaction) => {
+                  return (
+                    <>
+                      <Timeline>
+                        <Timeline.Item>
+                          <b>HCP Type: </b> {transaction.HCP_Type}
+                        </Timeline.Item>
+                        <Timeline.Item>
+                          <b>DOCTOR ID: </b> {transaction.DOCTOR_ID}
+                        </Timeline.Item>
+                        <Timeline.Item>
+                          <b>CITY: </b> {transaction.CITY}
+                        </Timeline.Item>
+                        <Timeline.Item>
+                          <b>BRAND: </b> {transaction.BRAND}
+                        </Timeline.Item>
+                      </Timeline>
+                      <Divider />
+                    </>
+                  );
+                })}
             </Panel>
           </Collapse>
         );
@@ -110,25 +227,18 @@ function Transactions() {
               className="search-area"
               placeholder="Search Transactions ( ClaimID, DoctorID, PatientID, ... )"
               enterButton={<SearchOutlined />}
-              size="Meduim"
+              size="small"
             />
           </Col>
           <Col span={4}>
-            {/* Note : LIVE + red circle */}
-            {/* from - to */}
             <PickerWithType />
           </Col>
         </Row>
         <Row style={{ marginTop: "15px" }}>
           <Col span={4}>
-            {/* Add loading when filter change */}
             <SideFilters></SideFilters>
           </Col>
           <Col span={20}>
-            {/* per minute */}
-            {/* build create data by time interval */}
-            <TimeChart data={predictions} />
-            <Divider />
             <Table columns={columns} dataSource={predictions} />
           </Col>
         </Row>

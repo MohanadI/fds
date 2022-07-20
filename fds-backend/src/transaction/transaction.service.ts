@@ -28,6 +28,20 @@ export class TransactionService {
     return transaction;
   }
 
+  async getTransactionBySubscriberSeqIDAndVisitSeq(
+    SUBSCRIBER_SEQ_ID,
+    VISIT_SEQ,
+  ): Promise<Transaction[]> {
+    const transactions = await this.transactionModel
+      .find()
+      .where({
+        SUBSCRIBER_SEQ_ID,
+        VISIT_SEQ,
+      })
+      .exec();
+    return transactions;
+  }
+
   async getTransactionsBySubscriberSeqID(SUBSCRIBER_SEQ_ID): Promise<any[]> {
     const transactions = await this.transactionModel
       .find({ SUBSCRIBER_SEQ_ID: SUBSCRIBER_SEQ_ID })

@@ -15,10 +15,14 @@ import { TransactionService } from './transaction.service';
 import { CreateTransactionDTO } from './dto/create-transaction.dto';
 import { ValidateObjectId } from '../shared/pipes/validate-object-id.pipes';
 import { Aggregator } from 'src/ml-model/aggregator';
+import { PredictionService } from 'src/prediction/prediction.service';
 
 @Controller('transaction')
 export class TransactionController {
-  constructor(private TransactionService: TransactionService) {}
+  constructor(
+    private TransactionService: TransactionService,
+    private PredictionService: PredictionService,
+  ) {}
 
   // Submit a transaction
   @Post('/transaction')
@@ -36,7 +40,7 @@ export class TransactionController {
       VISIT_SEQ,
       HOSPITAL_DOCTOR_ID,
       HCP_ID,
-      DATE_CREATED
+      DATE_CREATED,
     } = createTransactionDTO[0];
 
     const transactionsForPatientML =
@@ -59,10 +63,24 @@ export class TransactionController {
     );
 
     const patientCluster = predictions.patientResult?.data?.cluster;
-    const doctorCluster = predictions.patientResult?.data?.cluster;
+    const doctorCluster = predictions.doctorResult?.data?.cluster;
 
-    const patientPrediction = patientCluster === '0' ? 'N' : 'Y';
-    const doctorPrediction = doctorCluster === '0' ? 'N' : 'Y';
+    const patientPrediction =
+      patientCluster === '1'
+        ? 'Fraud'
+        : patientCluster === '2'
+        ? 'Abuse'
+        : patientCluster === '6'
+        ? 'Waste'
+        : 'Normal';
+    const doctorPrediction =
+      doctorCluster === '5'
+        ? 'Fraud'
+        : patientCluster === '3'
+        ? 'Abuse'
+        : patientCluster === '4'
+        ? 'Waste'
+        : 'Normal';
 
     const predictionToInsert = {
       SUBSCRIBER_SEQ_ID: SUBSCRIBER_SEQ_ID,
@@ -78,6 +96,8 @@ export class TransactionController {
     console.log(predictionToInsert);
     console.log(' --------------------- ');
     // insert new prediction into database ( predictions )
+
+    await this.PredictionService.addPrediction(predictionToInsert);
 
     return res.status(HttpStatus.OK).json({
       message: 'Transaction has been submitted successfully!',
@@ -95,6 +115,22 @@ export class TransactionController {
       transactionID,
     );
     if (!transaction) {
+      throw new NotFoundException('Transaction does not exist!');
+    }
+    return res.status(HttpStatus.OK).json(transaction);
+  }
+
+  @Get('transactionsBySSIAndVI/:SUBSCRIBER_SEQ_ID/:VISIT_SEQ')
+  async getTransactionBySubscriberSeqIDAndVisitSeq(
+    @Res() res,
+    @Param('SUBSCRIBER_SEQ_ID') SUBSCRIBER_SEQ_ID,
+    @Param('VISIT_SEQ') VISIT_SEQ,
+  ) {
+    const transaction = await this.TransactionService.getTransactionBySubscriberSeqIDAndVisitSeq(
+      SUBSCRIBER_SEQ_ID,
+      VISIT_SEQ,
+    );
+    if(!transaction) {
       throw new NotFoundException('Transaction does not exist!');
     }
     return res.status(HttpStatus.OK).json(transaction);

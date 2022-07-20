@@ -23,8 +23,12 @@ else -> normal(0)
   //   return 0.5;
   // });
 
-  // console.log(finalTransactions, "finalTransactions");
+  const filteredData = predictions?.data.map((item) => {
+    return item.PATIENT_CLUSTER
+  });
 
+  console.log(filteredData);
+  
   let options = {
     chart: {
       type: "spline",
@@ -106,8 +110,27 @@ else -> normal(0)
       ],
     },
     tooltip: {
-      valueSuffix: " Cluster",
-      headerFormat: "<b>{series.name}</b><br />",
+      shared: true,
+      useHTML: true,
+      formatter: function () {
+        let self = this;
+        let formattedString = "<small></small><table>";
+        self.points.forEach((elem) => {
+          formattedString +=
+            '<tr><td style="color: {series.color}">' +
+            elem.series.seqId +
+            ": </td>";
+          formattedString +=
+            '<td style="text-align: right"><b>' +
+            elem.patientCluster +
+            "</b></td>";
+          formattedString +=
+            '<td style="text-align: right">cts: <b>' +
+            elem.point.doctorCluster +
+            "</b></td></tr>";
+        });
+        return formattedString;
+      },
     },
     plotOptions: {
       spline: {
@@ -121,13 +144,13 @@ else -> normal(0)
           enabled: false,
         },
         pointInterval: 36000, // one hour
-        pointStart: Date.UTC(2019, 1, 13, 0, 0, 0),
+        pointStart: Date.now(),
       },
     },
     series: [
       {
         name: "Transaction",
-        data: predictions,
+        data: filteredData,
       },
     ],
     navigation: {
