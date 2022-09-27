@@ -37,12 +37,12 @@ export class TransactionService {
   }
 
   async getTransactionsByHOFSeqID(HOF_SEQ_ID): Promise<any[]> {
-    const fourMonthsAgo = moment()
-      .subtract(4, 'months')
+    const oneYearAgo = moment()
+      .subtract(1, 'years')
       .format('DD/MM/YY HH:MM');
     const transactions = await this.transactionModel
       .find({
-        DATE_CREATED: { $gte: fourMonthsAgo },
+        DATE_CREATED: { $gte: oneYearAgo },
         HOF_SEQ_ID: HOF_SEQ_ID,
       })
       .exec();
@@ -50,12 +50,12 @@ export class TransactionService {
   }
 
   async getTransactionsByDoctorID(HOSPITAL_DOCTOR_ID, HCP_ID): Promise<any[]> {
-    const fourMonthsAgo = moment()
-      .subtract(4, 'months')
+    const oneYearAgo = moment()
+      .subtract(1, 'years')
       .format('DD/MM/YY HH:MM');
     const transactions = await this.transactionModel
       .find({
-        DATE_CREATED: { $gte: fourMonthsAgo },
+        DATE_CREATED: { $gte: oneYearAgo },
         HOSPITAL_DOCTOR_ID: HOSPITAL_DOCTOR_ID,
         HCP_ID: HCP_ID,
       })
