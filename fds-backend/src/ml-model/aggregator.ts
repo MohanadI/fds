@@ -61,10 +61,9 @@ export class Aggregator {
     );
     //calculate patient features
     //*  number of visits per year
-    //*     filter for sub_seq and group by visit seq and sub sequence * 3
+    //*     filter for sub_seq and group by visit seq and sub sequence
     let number_of_visit_per_year =
-      [...new Set(subscriberActivities.map((item) => item.VISIT_SEQ))].length *
-      3;
+      [...new Set(subscriberActivities.map((item) => item.VISIT_SEQ))].length;
 
     //*  number of activities per visit
     //*      filter for sub_seq and get avg number of visits
@@ -78,19 +77,19 @@ export class Aggregator {
       subscriberActivities.length / Object.keys(subscriberVisits).length;
 
     //*  total cost per year
-    //*      filter for sub_seq and get total * 3
+    //*      filter for sub_seq and get total
     let totalCost = subscriberActivities.reduce((acc, curr) => {
       acc += curr.CLAIMED_VALUE;
       return acc;
     }, 0);
-    let avgSumClaimPerYear = totalCost * 3;
+    let avgSumClaimPerYear = +totalCost;
 
     //*  average cost per visit
     //*      filter for sub_seq and get avg cost of visits
     let avgSumClaimPerVisit = totalCost / Object.keys(subscriberVisits).length;
 
     //*  avg count of occurences for THR_CODE
-    //*      filter for sub_seq and count each THR_code and get max * 3
+    //*      filter for sub_seq and count each THR_code and get max
 
     const thrCodes = subscriberActivities.reduce((acc, curr) => {
       if (curr.THR_CODE) {
@@ -106,7 +105,7 @@ export class Aggregator {
         ThrCodeMax = Math.max(element.length, ThrCodeMax);
       }
     }
-    ThrCodeMax = ThrCodeMax * 3;
+    ThrCodeMax = +ThrCodeMax;
 
     //*  الفرق الزمني بين الزيارات لنفس العائله
     //*      group by visit(sub and visit) and order it and then calulate avg of differences
@@ -134,7 +133,7 @@ export class Aggregator {
     }
 
     //*  عدد الزيارات نفس العائله لنفس الدكتور
-    //*      group by visit(sub and visit) and then count for each doctor and get max * 3
+    //*      group by visit(sub and visit) and then count for each doctor and get max
     let doctorVisits: any = {};
     for (let key in hofVisits) {
       let doctorActivity = hofVisits[key].find((item) => {
@@ -155,7 +154,7 @@ export class Aggregator {
         doctorVisitsMax = Math.max(element.length, doctorVisitsMax);
       }
     }
-    let maxSUBVisitsSameDoctor = doctorVisitsMax * 3;
+    let maxSUBVisitsSameDoctor = +doctorVisitsMax;
 
     //*  isWestbank or Gaza
     //*      simple for last visit for the subscriber
@@ -191,7 +190,7 @@ export class Aggregator {
     // calculate doctor features
     //
     // *   avg count of occurences for THR_CODE
-    // *      filter for HospitalDoctorId and HCP_ID and count each THR_code and get max * 3
+    // *      filter for HospitalDoctorId and HCP_ID and count each THR_code and get max
     const thrCodes = transactionsForDoctorML.reduce((acc, curr) => {
       if (curr.THR_CODE) {
         if (!acc[curr.THR_CODE]) acc[curr.THR_CODE] = []; //If this type wasn't previously stored
@@ -206,7 +205,7 @@ export class Aggregator {
         ThrCodeMax = Math.max(element.length, ThrCodeMax);
       }
     }
-    ThrCodeMax = ThrCodeMax * 3;
+    ThrCodeMax = +ThrCodeMax;
 
     // *   number of activities per visit
     // *      filter for HospitalDoctorId and HcpId and get avg number of visits
@@ -230,8 +229,8 @@ export class Aggregator {
     let avgSumClaim = totalCost / Object.keys(subscriberVisits).length;
 
     // *   avg visits per year
-    // *       filter for HospitalDoctorId and HcpId and group by visit seq and subSequenceId * 3
-    let max_Doctor_visit_peryear = Object.keys(subscriberVisits).length * 3;
+    // *       filter for HospitalDoctorId and HcpId and group by visit seq and subSequenceId
+    let max_Doctor_visit_peryear = Object.keys(subscriberVisits).length;
 
     // *   avg count of medicines prescriped by doctor per visit (pharmacy)
     // *       group by visit(sub and visit) and filter for pharmacy only and get avg
@@ -249,7 +248,6 @@ export class Aggregator {
     let numberOfSubscribers = [
       ...new Set(doctorProcedures.map((item) => item.SUBSCRIBER_SEQ_ID)),
     ].length;
-    //todo(neirat): should we multiply by 3?
     let totalCostOfDoctorProcedures = doctorProcedures.reduce((acc, curr) => {
       acc += curr.CLAIMED_VALUE;
       return acc;
