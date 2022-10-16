@@ -30,10 +30,18 @@ export class TransactionController {
     @Res() res,
     @Body() createTransactionDTO: CreateTransactionDTO[],
   ) {
-    for (let i = 0; i < createTransactionDTO.length; i++) {
-      await this.TransactionService.addTransaction(createTransactionDTO[i]);
-    }
+    // for (let i = 0; i < createTransactionDTO.length; i++) {
+    //   await this.TransactionService.addTransaction(createTransactionDTO[i]);
+    // }
+    let transActivities = await this.TransactionService.getTransactions();
+    const result = transActivities.reduce(function (r, a) {
+      r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] = r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] || [];
+      r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID].push(a);
+      return r;
+  }, Object.create(null));
 
+  for(let key in result) {
+    let transActivitiesList = result[key];
     const {
       HOF_SEQ_ID,
       SUBSCRIBER_SEQ_ID,
@@ -41,7 +49,7 @@ export class TransactionController {
       HOSPITAL_DOCTOR_ID,
       HCP_ID,
       DATE_CREATED,
-    } = createTransactionDTO[0];
+    } = transActivitiesList[0];
 
     const transactionsForPatientML =
       await this.TransactionService.getTransactionsByHOFSeqID(HOF_SEQ_ID);
@@ -98,6 +106,7 @@ export class TransactionController {
     // insert new prediction into database ( predictions )
 
     await this.PredictionService.addPrediction(predictionToInsert);
+  }
 
     return res.status(HttpStatus.OK).json({
       message: 'Transaction has been submitted successfully!',
