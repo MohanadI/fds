@@ -97,8 +97,8 @@ export class TransactionService {
           {        
             $set: {
               // EFFECTIVE_DATE: { $dateFromString: { dateString: "$EFFECTIVE_DATE" } },
-              DATE_CREATED: { $dateFromString: { dateString: "$DATE_CREATED" } },
-              // VISIT_DATE: { $dateFromString: { dateString: "$VISIT_DATE" } },
+              // DATE_CREATED: { $dateFromString: { dateString: "$DATE_CREATED" } },
+              VISIT_DATE: { $dateFromString: { dateString: "$VISIT_DATE", format: "%d/%m/%Y" } },
               // EXPIRATION_DATE: { $dateFromString: { dateString: "$EXPIRATION_DATE" } }
             }
           }
