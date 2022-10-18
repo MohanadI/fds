@@ -33,6 +33,10 @@ export class TransactionController {
     // for (let i = 0; i < createTransactionDTO.length; i++) {
     //   await this.TransactionService.addTransaction(createTransactionDTO[i]);
     // }
+    
+    console.log("hello2");
+    await this.TransactionService.replaceDate();
+
     let transActivities = await this.TransactionService.getTransactions();
     const result = transActivities.reduce(function (r, a) {
       r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] = r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] || [];
@@ -105,7 +109,7 @@ export class TransactionController {
     console.log(' --------------------- ');
     // insert new prediction into database ( predictions )
 
-    await this.PredictionService.addPrediction(predictionToInsert);
+    // await this.PredictionService.addPrediction(predictionToInsert);
   }
 
     return res.status(HttpStatus.OK).json({
