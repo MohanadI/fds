@@ -89,10 +89,7 @@ let TransactionService = class TransactionService {
             .updateMany({}, [
             {
                 $set: {
-                    EFFECTIVE_DATE: { $dateFromString: { dateString: "$EFFECTIVE_DATE" } },
                     DATE_CREATED: { $dateFromString: { dateString: "$DATE_CREATED" } },
-                    VISIT_DATE: { $dateFromString: { dateString: "$VISIT_DATE" } },
-                    EXPIRATION_DATE: { $dateFromString: { dateString: "$EXPIRATION_DATE" } }
                 }
             }
         ])
