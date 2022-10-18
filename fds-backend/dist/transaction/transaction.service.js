@@ -50,8 +50,7 @@ let TransactionService = class TransactionService {
     }
     async getTransactionsByHOFSeqID(HOF_SEQ_ID) {
         const oneYearAgo = moment()
-            .subtract(1, 'years')
-            .format('DD/MM/YY HH:MM');
+            .subtract(1, 'years');
         const transactions = await this.transactionModel
             .find({
             VISIT_DATE: { $gte: oneYearAgo },
@@ -62,8 +61,7 @@ let TransactionService = class TransactionService {
     }
     async getTransactionsByDoctorID(HOSPITAL_DOCTOR_ID, HCP_ID) {
         const oneYearAgo = moment()
-            .subtract(1, 'years')
-            .format('DD/MM/YY HH:MM');
+            .subtract(1, 'years');
         const transactions = await this.transactionModel
             .find({
             VISIT_DATE: { $gte: oneYearAgo },
