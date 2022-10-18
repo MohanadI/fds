@@ -64,7 +64,7 @@ class Aggregator {
         let timediff = 0;
         let prevDateCreated = 0;
         for (let key in hofVisits) {
-            let dateCreated = hofVisits[key][0].DATE_CREATED;
+            let dateCreated = hofVisits[key][0].VISIT_DATE;
             if (prevDateCreated) {
                 let millis = new Date(dateCreated).getTime() - new Date(prevDateCreated).getTime();
                 timediff += Math.floor(millis / 60 / 60 / 24);

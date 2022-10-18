@@ -6,5 +6,5 @@ export interface Prediction extends Document {
     readonly PATIENT_CLUSTER: String;
     readonly DOCTOR_CLUSTER_PREDICTION: String;
     readonly PATIENT_CLUSTER_PREDICTION: String;
-    readonly DATE_CREATED: String;
+    readonly VISIT_DATE: Date;
 }

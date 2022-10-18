@@ -9,7 +9,7 @@ exports.TransactionSchema = new mongoose.Schema({
     HCP_ID: String,
     HOSPITAL_DOCTOR_ID: String,
     CLAIMING_HCP_ID: String,
-    VISIT_DATE: String,
+    VISIT_DATE: Date,
     VISIT_SEQ: String,
     CLAIM_PAYMENT_TYPE: String,
     PAYMENT_TYPE: String,
@@ -54,7 +54,7 @@ exports.TransactionSchema = new mongoose.Schema({
     EP_MDC_CPT_CODE: String,
     CITY_CODE: String,
     CITY: String,
-    DATE_CREATED: String,
+    DATE_CREATED: Date,
     CLAIMED_VALUE: String
 });
 //# sourceMappingURL=transaction.schema.js.map

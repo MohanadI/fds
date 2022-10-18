@@ -26,8 +26,7 @@ let TransactionController = class TransactionController {
     }
     async addTransaction(res, createTransactionDTO) {
         var _a, _b, _c, _d;
-        console.log("hello2");
-        await this.TransactionService.replaceDate();
+        console.log("hello3");
         let transActivities = await this.TransactionService.getTransactions();
         const result = transActivities.reduce(function (r, a) {
             r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] = r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] || [];
@@ -36,7 +35,7 @@ let TransactionController = class TransactionController {
         }, Object.create(null));
         for (let key in result) {
             let transActivitiesList = result[key];
-            const { HOF_SEQ_ID, SUBSCRIBER_SEQ_ID, VISIT_SEQ, HOSPITAL_DOCTOR_ID, HCP_ID, DATE_CREATED, } = transActivitiesList[0];
+            const { HOF_SEQ_ID, SUBSCRIBER_SEQ_ID, VISIT_SEQ, HOSPITAL_DOCTOR_ID, HCP_ID, VISIT_DATE, } = transActivitiesList[0];
             const transactionsForPatientML = await this.TransactionService.getTransactionsByHOFSeqID(HOF_SEQ_ID);
             const transactionsForDoctorML = await this.TransactionService.getTransactionsByDoctorID(HOSPITAL_DOCTOR_ID, HCP_ID);
             const newAggregator = new aggregator_1.Aggregator();
@@ -64,11 +63,12 @@ let TransactionController = class TransactionController {
                 PATIENT_CLUSTER: patientCluster,
                 DOCTOR_CLUSTER_PREDICTION: doctorPrediction,
                 PATIENT_CLUSTER_PREDICTION: patientPrediction,
-                DATE_CREATED: DATE_CREATED,
+                VISIT_DATE: VISIT_DATE,
             };
             console.log(' --------------------- ');
             console.log(predictionToInsert);
             console.log(' --------------------- ');
+            await this.PredictionService.addPrediction(predictionToInsert);
         }
         return res.status(common_1.HttpStatus.OK).json({
             message: 'Transaction has been submitted successfully!',

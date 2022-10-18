@@ -6,7 +6,7 @@ export declare const TransactionSchema: mongoose.Schema<any, mongoose.Model<any,
     HCP_ID?: string;
     HOSPITAL_DOCTOR_ID?: string;
     CLAIMING_HCP_ID?: string;
-    VISIT_DATE?: string;
+    VISIT_DATE?: Date;
     VISIT_SEQ?: string;
     CLAIM_PAYMENT_TYPE?: string;
     PAYMENT_TYPE?: string;
@@ -51,6 +51,6 @@ export declare const TransactionSchema: mongoose.Schema<any, mongoose.Model<any,
     EP_MDC_CPT_CODE?: string;
     CITY_CODE?: string;
     CITY?: string;
-    DATE_CREATED?: string;
+    DATE_CREATED?: Date;
     CLAIMED_VALUE?: string;
 }>;

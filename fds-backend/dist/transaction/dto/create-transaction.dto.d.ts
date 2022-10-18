@@ -5,7 +5,7 @@ export declare class CreateTransactionDTO {
     readonly HCP_ID: String;
     readonly HOSPITAL_DOCTOR_ID: String;
     readonly CLAIMING_HCP_ID: String;
-    readonly VISIT_DATE: String;
+    readonly VISIT_DATE: Date;
     readonly VISIT_SEQ: String;
     readonly CLAIM_PAYMENT_TYPE: String;
     readonly PAYMENT_TYPE: String;
@@ -50,6 +50,6 @@ export declare class CreateTransactionDTO {
     readonly EP_MDC_CPT_CODE: String;
     readonly CITY_CODE: String;
     readonly CITY: String;
-    readonly DATE_CREATED: String;
+    readonly DATE_CREATED: Date;
     readonly CLAIMED_VALUE: String;
 }
