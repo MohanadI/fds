@@ -76,12 +76,27 @@ let TransactionService = class TransactionService {
     async getTransactions() {
         const transactions = await this.transactionModel
             .find()
-            .limit(1000)
             .sort({
             DATE_CREATED: -1,
         })
+            .limit(1000)
             .exec();
         return transactions;
+    }
+    async replaceDate() {
+        const transactions = await this.transactionModel
+            .find()
+            .updateMany({}, [
+            {
+                $set: {
+                    EFFECTIVE_DATE: { $dateFromString: { dateString: "$EFFECTIVE_DATE" } },
+                    DATE_CREATED: { $dateFromString: { dateString: "$DATE_CREATED" } },
+                    VISIT_DATE: { $dateFromString: { dateString: "$VISIT_DATE" } },
+                    EXPIRATION_DATE: { $dateFromString: { dateString: "$EXPIRATION_DATE" } }
+                }
+            }
+        ])
+            .exec();
     }
     async editTransaction(transactionID, createTransactionDTO) {
         const editedTransaction = await this.transactionModel.findByIdAndUpdate(transactionID, createTransactionDTO, { new: true });

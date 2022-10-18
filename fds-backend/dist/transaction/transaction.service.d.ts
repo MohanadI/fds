@@ -11,6 +11,7 @@ export declare class TransactionService {
     getTransactionsByHOFSeqID(HOF_SEQ_ID: any): Promise<any[]>;
     getTransactionsByDoctorID(HOSPITAL_DOCTOR_ID: any, HCP_ID: any): Promise<any[]>;
     getTransactions(): Promise<Transaction[]>;
+    replaceDate(): Promise<any>;
     editTransaction(transactionID: any, createTransactionDTO: CreateTransactionDTO): Promise<Transaction>;
     deleteTransaction(transactionID: any): Promise<any>;
 }

@@ -26,6 +26,8 @@ let TransactionController = class TransactionController {
     }
     async addTransaction(res, createTransactionDTO) {
         var _a, _b, _c, _d;
+        console.log("hello2");
+        await this.TransactionService.replaceDate();
         let transActivities = await this.TransactionService.getTransactions();
         const result = transActivities.reduce(function (r, a) {
             r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] = r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] || [];
@@ -67,7 +69,6 @@ let TransactionController = class TransactionController {
             console.log(' --------------------- ');
             console.log(predictionToInsert);
             console.log(' --------------------- ');
-            await this.PredictionService.addPrediction(predictionToInsert);
         }
         return res.status(common_1.HttpStatus.OK).json({
             message: 'Transaction has been submitted successfully!',
