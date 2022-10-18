@@ -56,7 +56,7 @@ export class TransactionService {
       .format('DD/MM/YY HH:MM');
     const transactions = await this.transactionModel
       .find({
-        DATE_CREATED: { $gte: oneYearAgo },
+        VISIT_DATE: { $gte: oneYearAgo },
         HOF_SEQ_ID: HOF_SEQ_ID,
       })
       .exec();
@@ -69,7 +69,7 @@ export class TransactionService {
       .format('DD/MM/YY HH:MM');
     const transactions = await this.transactionModel
       .find({
-        DATE_CREATED: { $gte: oneYearAgo },
+        VISIT_DATE: { $gte: oneYearAgo },
         HOSPITAL_DOCTOR_ID: HOSPITAL_DOCTOR_ID,
         HCP_ID: HCP_ID,
       })
@@ -81,7 +81,7 @@ export class TransactionService {
     const transactions = await this.transactionModel
       .find()
       .sort({
-        DATE_CREATED: -1,
+        VISIT_DATE: -1,
       })
       .limit(1000)
       .exec();

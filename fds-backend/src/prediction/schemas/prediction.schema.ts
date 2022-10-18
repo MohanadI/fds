@@ -7,5 +7,5 @@ export const PredictionSchema = new mongoose.Schema({
   PATIENT_CLUSTER: String,
   DOCTOR_CLUSTER_PREDICTION: String,
   PATIENT_CLUSTER_PREDICTION: String,
-  DATE_CREATED: String,
+  VISIT_DATE: Date,
 });

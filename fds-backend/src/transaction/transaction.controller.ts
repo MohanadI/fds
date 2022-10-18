@@ -34,8 +34,8 @@ export class TransactionController {
     //   await this.TransactionService.addTransaction(createTransactionDTO[i]);
     // }
     
-    console.log("hello2");
-    await this.TransactionService.replaceDate();
+    console.log("hello3");
+    // await this.TransactionService.replaceDate();
 
     let transActivities = await this.TransactionService.getTransactions();
     const result = transActivities.reduce(function (r, a) {
@@ -52,7 +52,7 @@ export class TransactionController {
       VISIT_SEQ,
       HOSPITAL_DOCTOR_ID,
       HCP_ID,
-      DATE_CREATED,
+      VISIT_DATE,
     } = transActivitiesList[0];
 
     const transactionsForPatientML =
@@ -101,7 +101,7 @@ export class TransactionController {
       PATIENT_CLUSTER: patientCluster,
       DOCTOR_CLUSTER_PREDICTION: doctorPrediction,
       PATIENT_CLUSTER_PREDICTION: patientPrediction,
-      DATE_CREATED: DATE_CREATED,
+      VISIT_DATE: VISIT_DATE,
     };
 
     console.log(' --------------------- ');
@@ -109,7 +109,7 @@ export class TransactionController {
     console.log(' --------------------- ');
     // insert new prediction into database ( predictions )
 
-    // await this.PredictionService.addPrediction(predictionToInsert);
+    await this.PredictionService.addPrediction(predictionToInsert);
   }
 
     return res.status(HttpStatus.OK).json({
