@@ -89,7 +89,7 @@ let TransactionService = class TransactionService {
             .updateMany({}, [
             {
                 $set: {
-                    DATE_CREATED: { $dateFromString: { dateString: "$DATE_CREATED" } },
+                    VISIT_DATE: { $dateFromString: { dateString: "$VISIT_DATE", format: "%d/%m/%Y" } },
                 }
             }
         ])
