@@ -40,7 +40,7 @@ let PredictionService = class PredictionService {
         return prediction;
     }
     async getPredictions() {
-        const Predictions = await this.predictionModel.find().limit(10).exec();
+        const Predictions = await this.predictionModel.find().exec();
         return Predictions;
     }
     async editPrediction(predictionID, createPredictionDTO) {
