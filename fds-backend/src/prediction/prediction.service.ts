@@ -38,7 +38,7 @@ export class PredictionService {
   }
 
   async getPredictions(): Promise<Prediction[]> {
-    const Predictions = await this.predictionModel.find().limit(10).exec();
+    const Predictions = await this.predictionModel.find().exec();
     return Predictions;
   }
 
