@@ -26,9 +26,10 @@ let TransactionController = class TransactionController {
     }
     async addTransaction(res, createTransactionDTO) {
         var _a, _b, _c, _d;
-        console.log("hello3");
-        let transActivities = await this.TransactionService.getTransactions();
-        const result = transActivities.reduce(function (r, a) {
+        for (let i = 0; i < createTransactionDTO.length; i++) {
+            await this.TransactionService.addTransaction(createTransactionDTO[i]);
+        }
+        const result = createTransactionDTO.reduce(function (r, a) {
             r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] = r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] || [];
             r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID].push(a);
             return r;
@@ -68,7 +69,13 @@ let TransactionController = class TransactionController {
             console.log(' --------------------- ');
             console.log(predictionToInsert);
             console.log(' --------------------- ');
-            await this.PredictionService.addPrediction(predictionToInsert);
+            let predictionExists = await this.PredictionService.getPredictionBySubAndVisit(SUBSCRIBER_SEQ_ID, VISIT_SEQ);
+            if (predictionExists && predictionExists.length) {
+                await this.PredictionService.editPrediction(predictionExists[0]._id, predictionToInsert);
+            }
+            else {
+                await this.PredictionService.addPrediction(predictionToInsert);
+            }
         }
         return res.status(common_1.HttpStatus.OK).json({
             message: 'Transaction has been submitted successfully!',

@@ -30,6 +30,15 @@ let PredictionService = class PredictionService {
             .exec();
         return prediction;
     }
+    async getPredictionBySubAndVisit(subscriberSeqID, visitSeq) {
+        const prediction = await this.predictionModel
+            .find({
+            SUBSCRIBER_SEQ_ID: subscriberSeqID,
+            VISIT_SEQ: visitSeq
+        })
+            .exec();
+        return prediction;
+    }
     async getPredictions() {
         const Predictions = await this.predictionModel.find().limit(10).exec();
         return Predictions;

@@ -6,6 +6,7 @@ export declare class PredictionService {
     constructor(predictionModel: Model<Prediction>);
     addPrediction(createPredictionDTO: CreatePredictionDTO): Promise<Prediction>;
     getPrediction(predictionID: any): Promise<Prediction>;
+    getPredictionBySubAndVisit(subscriberSeqID: any, visitSeq: any): Promise<Prediction[]>;
     getPredictions(): Promise<Prediction[]>;
     editPrediction(predictionID: any, createPredictionDTO: CreatePredictionDTO): Promise<Prediction>;
     deletePrediction(predictionID: any): Promise<any>;
