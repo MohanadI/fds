@@ -209,6 +209,19 @@ function Transactions() {
     },
   ];
 
+  const onSearchHandler = (e) => {
+    const value = e.target.value || "";
+    setPredictions(
+      predictions?.find(
+        (p) => p.SUBSCRIBER_SEQ_ID === value || p.VISIT_SEQ === value
+      )
+    );
+  };
+
+  const onFiltersChangeHandler = (filterName, value) => {
+    setPredictions(predictions?.find((p) => p[filterName].includes(value)));
+  };
+
   return (
     <div>
       <Spin spinning={isFetching}>
@@ -225,9 +238,10 @@ function Transactions() {
           <Col span={16}>
             <Search
               className="search-area"
-              placeholder="Search Transactions ( ClaimID, DoctorID, PatientID, ... )"
+              placeholder="Search By SUBSCRIBER_SEQ_ID OR VISIT_SEQ"
               enterButton={<SearchOutlined />}
               size="small"
+              onChange={onSearchHandler}
             />
           </Col>
           <Col span={4}>
@@ -236,7 +250,7 @@ function Transactions() {
         </Row>
         <Row style={{ marginTop: "15px" }}>
           <Col span={4}>
-            <SideFilters></SideFilters>
+            <SideFilters onFiltersChange={onFiltersChangeHandler} />
           </Col>
           <Col span={20}>
             <Table columns={columns} dataSource={predictions} />
