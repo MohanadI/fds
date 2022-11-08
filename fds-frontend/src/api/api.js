@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const SERVER_URL = `${window.location.protocol}//${window.location.hostname}:3000/`;
+const SERVER_URL = `${window.location.protocol}//${window.location.hostname}:3007/`;
 const PREDICTION_MODULE = "prediction/";
 const TRANSACTION_MODULE = "transaction/";
 
