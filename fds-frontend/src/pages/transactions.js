@@ -212,14 +212,14 @@ function Transactions() {
   const onSearchHandler = (e) => {
     const value = e.target.value || "";
     setPredictions(
-      predictions?.find(
+      predictions?.filter(
         (p) => p.SUBSCRIBER_SEQ_ID === value || p.VISIT_SEQ === value
       )
     );
   };
 
   const onFiltersChangeHandler = (filterName, value) => {
-    setPredictions(predictions?.find((p) => p[filterName].includes(value)));
+    setPredictions(predictions?.filter((p) => p[filterName].includes(value)));
   };
 
   return (
