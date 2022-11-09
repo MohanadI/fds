@@ -221,25 +221,25 @@ function Transactions() {
 
   const applyFilters = () => {
     console.log(filtersValues);
-    setFilteredPredictions(predictions);
+
+    let pred = predictions;
 
     if (filtersValues.searchText) {
-      setFilteredPredictions(
-        filteredPredictions?.filter(
+      pred = pred?.filter(
           (p) => p.SUBSCRIBER_SEQ_ID === filtersValues.searchText || p.VISIT_SEQ === filtersValues.searchText
-        )
-      );
+        );
     }
     
     let filterPatient = filtersValues.PATIENT_CLUSTER_PREDICTION;
     if (filterPatient && filterPatient.length) {
-      setFilteredPredictions(filteredPredictions?.filter((p) => filterPatient.includes(p.PATIENT_CLUSTER_PREDICTION)));
+      pred = pred?.filter((p) => filterPatient.includes(p.PATIENT_CLUSTER_PREDICTION));
     }
 
     let filterDoctor = filtersValues.DOCTOR_CLUSTER_PREDICTION;
     if (filterDoctor && filterDoctor.length) {
-      setFilteredPredictions(filteredPredictions?.filter((p) => filterDoctor.includes(p.DOCTOR_CLUSTER_PREDICTION)));
+      pred = pred?.filter((p) => filterDoctor.includes(p.DOCTOR_CLUSTER_PREDICTION));
     }
+    setFilteredPredictions(pred);
   }
 
   const onSearchHandler = (e) => {
