@@ -211,21 +211,43 @@ function Transactions() {
     },
   ];
 
+  let filtersValues = {
+    searchText: '',
+    PATIENT_CLUSTER_PREDICTION: [],
+    DOCTOR_CLUSTER_PREDICTION: []
+  }
+
+  const applyFilters = () => {
+    setFilteredPredictions(predictions);
+
+    if (filtersValues.searchText) {
+      setFilteredPredictions(
+        filteredPredictions?.filter(
+          (p) => p.SUBSCRIBER_SEQ_ID === filtersValues.searchText || p.VISIT_SEQ === filtersValues.searchText
+        )
+      );
+    }
+    
+    let filterPatient = filtersValues.DOCTOR_CLUSTER_PREDICTION;
+    if (filterPatient && filterPatient.length) {
+      setFilteredPredictions(filteredPredictions?.filter((p) => filterPatient.includes(p.PATIENT_CLUSTER_PREDICTION)));
+    }
+
+    let filterDoctor = filtersValues.DOCTOR_CLUSTER_PREDICTION;
+    if (filterDoctor && filterDoctor.length) {
+      setFilteredPredictions(filteredPredictions?.filter((p) => filterDoctor.includes(p.DOCTOR_CLUSTER_PREDICTION)));
+    }
+  }
+
   const onSearchHandler = (e) => {
     const value = e.target.value || "";
-    setFilteredPredictions(
-      predictions?.filter(
-        (p) => p.SUBSCRIBER_SEQ_ID === value || p.VISIT_SEQ === value
-      )
-    );
+    filtersValues.searchText = value;
+    applyFilters();
   };
 
   const onFiltersChangeHandler = (filterName, value) => {
-    if (value && value.length) {
-      setFilteredPredictions(predictions?.filter((p) => value.includes(p[filterName])));
-    } else {
-      setFilteredPredictions(predictions);
-    }
+    filtersValues[filterName] = value;
+    applyFilters();
   };
 
   return (
