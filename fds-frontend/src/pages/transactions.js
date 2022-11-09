@@ -109,7 +109,7 @@ function Transactions() {
         color: "orange",
         text: "Abuse",
       };
-    } else if (prediction === "waste") {
+    } else if (prediction === "Waste") {
       return {
         color: "green",
         text: "Waste",
