@@ -31,6 +31,7 @@ function Transactions() {
   const { Title } = Typography;
 
   const [predictions, setPredictions] = useState([]);
+  const [filteredPredictions, setFilteredPredictions] = useState([]);
   const [currentTransactions, setCurrentTransactions] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState({});
   const [isFetching, setIsFetching] = useState(true);
@@ -52,9 +53,9 @@ function Transactions() {
     }
   }, [selectedTransaction]);
 
-  useInterval(() => {
-    fetchPatientPredictions();
-  }, 60 * 1000);
+  // useInterval(() => {
+  //   fetchPatientPredictions();
+  // }, 60 * 1000);
 
   async function fetchPatientPredictions() {
     setIsFetching(true);
@@ -63,6 +64,7 @@ function Transactions() {
         .then((res) => {
           if (res && res.data.length > 0) {
             setPredictions(res.data);
+            setFilteredPredictions(res.data);
           }
           message.success("Successfully fetched predictions");
           setIsFetching(false);
@@ -211,7 +213,7 @@ function Transactions() {
 
   const onSearchHandler = (e) => {
     const value = e.target.value || "";
-    setPredictions(
+    setFilteredPredictions(
       predictions?.filter(
         (p) => p.SUBSCRIBER_SEQ_ID === value || p.VISIT_SEQ === value
       )
@@ -219,7 +221,7 @@ function Transactions() {
   };
 
   const onFiltersChangeHandler = (filterName, value) => {
-    setPredictions(predictions?.filter((p) => p[filterName].includes(value)));
+    setFilteredPredictions(predictions?.filter((p) => value.includes(p[filterName])));
   };
 
   return (
@@ -253,7 +255,7 @@ function Transactions() {
             <SideFilters onFiltersChange={onFiltersChangeHandler} />
           </Col>
           <Col span={20}>
-            <Table columns={columns} dataSource={predictions} />
+            <Table columns={columns} dataSource={filteredPredictions} />
           </Col>
         </Row>
       </Spin>
