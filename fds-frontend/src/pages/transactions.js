@@ -220,8 +220,6 @@ function Transactions() {
   ];
 
   const applyFilters = () => {
-    console.log(filtersValues);
-
     let pred = predictions;
 
     if (filtersValues.searchText) {
