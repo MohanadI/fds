@@ -25,6 +25,8 @@ import {
 } from "../api/api";
 import useInterval from "../utils/useInterval";
 
+var filtersValues;
+
 function Transactions() {
   const { Search } = Input;
   const { Panel } = Collapse;
@@ -40,6 +42,12 @@ function Transactions() {
     console.log("----------------------------------");
     console.log("fetchPatientPredictions: useEffect()");
     fetchPatientPredictions();
+    
+  filtersValues = {
+    searchText: '',
+    PATIENT_CLUSTER_PREDICTION: [],
+    DOCTOR_CLUSTER_PREDICTION: []
+  }
   }, []);
 
   useEffect(() => {
@@ -211,13 +219,8 @@ function Transactions() {
     },
   ];
 
-  let filtersValues = {
-    searchText: '',
-    PATIENT_CLUSTER_PREDICTION: [],
-    DOCTOR_CLUSTER_PREDICTION: []
-  }
-
   const applyFilters = () => {
+
     setFilteredPredictions(predictions);
 
     if (filtersValues.searchText) {
