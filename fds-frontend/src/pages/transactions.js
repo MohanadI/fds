@@ -228,7 +228,7 @@ function Transactions() {
       );
     }
     
-    let filterPatient = filtersValues.DOCTOR_CLUSTER_PREDICTION;
+    let filterPatient = filtersValues.PATIENT_CLUSTER_PREDICTION;
     if (filterPatient && filterPatient.length) {
       setFilteredPredictions(filteredPredictions?.filter((p) => filterPatient.includes(p.PATIENT_CLUSTER_PREDICTION)));
     }
