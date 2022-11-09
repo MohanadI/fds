@@ -27,7 +27,7 @@ function SideFilters({ onFiltersChange }) {
         <Button
           style={{ float: "right" }}
           size="small"
-          onClick={() => setCheckedList([])}
+          onClick={() => onChange([])}
         >
           Clear All
         </Button>
@@ -61,7 +61,7 @@ function SideFilters({ onFiltersChange }) {
         <Button
           style={{ float: "right" }}
           size="small"
-          onClick={() => setDoctorCheckedList([])}
+          onClick={() => onDoctorListChange([])}
         >
           Clear All
         </Button>

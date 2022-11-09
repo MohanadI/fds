@@ -221,7 +221,11 @@ function Transactions() {
   };
 
   const onFiltersChangeHandler = (filterName, value) => {
-    setFilteredPredictions(predictions?.filter((p) => value.includes(p[filterName])));
+    if (value && value.length) {
+      setFilteredPredictions(predictions?.filter((p) => value.includes(p[filterName])));
+    } else {
+      setFilteredPredictions(predictions);
+    }
   };
 
   return (
