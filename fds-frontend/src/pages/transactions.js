@@ -220,7 +220,7 @@ function Transactions() {
   ];
 
   const applyFilters = () => {
-
+    console.log(filtersValues);
     setFilteredPredictions(predictions);
 
     if (filtersValues.searchText) {
