@@ -124,6 +124,61 @@ let TransactionController = class TransactionController {
             transaction: deletedTransaction,
         });
     }
+    async addPredictTransaction(res, createTransactionDTO) {
+        var _a, _b, _c, _d;
+        const result = createTransactionDTO.reduce(function (r, a) {
+            r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] = r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] || [];
+            r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID].push(a);
+            return r;
+        }, Object.create(null));
+        for (let key in result) {
+            let transActivitiesList = result[key];
+            const { HOF_SEQ_ID, SUBSCRIBER_SEQ_ID, VISIT_SEQ, HOSPITAL_DOCTOR_ID, HCP_ID, VISIT_DATE, } = transActivitiesList[0];
+            const transactionsForPatientML = await this.TransactionService.getTransactionsByHOFSeqID(HOF_SEQ_ID);
+            const transactionsForDoctorML = await this.TransactionService.getTransactionsByDoctorID(HOSPITAL_DOCTOR_ID, HCP_ID);
+            const newAggregator = new aggregator_1.Aggregator();
+            const predictions = await newAggregator.getMLPrediction(HOF_SEQ_ID, SUBSCRIBER_SEQ_ID, VISIT_SEQ, HOSPITAL_DOCTOR_ID, HCP_ID, transactionsForPatientML, transactionsForDoctorML);
+            const patientCluster = (_b = (_a = predictions.patientResult) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.cluster;
+            const doctorCluster = (_d = (_c = predictions.doctorResult) === null || _c === void 0 ? void 0 : _c.data) === null || _d === void 0 ? void 0 : _d.cluster;
+            const patientPrediction = patientCluster === '1'
+                ? 'Fraud'
+                : patientCluster === '2'
+                    ? 'Abuse'
+                    : patientCluster === '6'
+                        ? 'Waste'
+                        : 'Normal';
+            const doctorPrediction = doctorCluster === '5'
+                ? 'Fraud'
+                : patientCluster === '3'
+                    ? 'Abuse'
+                    : patientCluster === '4'
+                        ? 'Waste'
+                        : 'Normal';
+            const predictionToInsert = {
+                SUBSCRIBER_SEQ_ID: SUBSCRIBER_SEQ_ID,
+                VISIT_SEQ: VISIT_SEQ,
+                DOCTOR_CLUSTER: doctorCluster,
+                PATIENT_CLUSTER: patientCluster,
+                DOCTOR_CLUSTER_PREDICTION: doctorPrediction,
+                PATIENT_CLUSTER_PREDICTION: patientPrediction,
+                VISIT_DATE: VISIT_DATE,
+            };
+            console.log(' --------------------- ');
+            console.log(predictionToInsert);
+            console.log(' --------------------- ');
+            let predictionExists = await this.PredictionService.getPredictionBySubAndVisit(SUBSCRIBER_SEQ_ID, VISIT_SEQ);
+            if (predictionExists && predictionExists.length) {
+                await this.PredictionService.editPrediction(predictionExists[0]._id, predictionToInsert);
+            }
+            else {
+                await this.PredictionService.addPrediction(predictionToInsert);
+            }
+        }
+        return res.status(common_1.HttpStatus.OK).json({
+            message: 'Transaction has been submitted successfully!',
+            transaction: {},
+        });
+    }
 };
 __decorate([
     (0, common_1.Post)('/transaction'),
@@ -182,6 +237,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], TransactionController.prototype, "deleteTransaction", null);
+__decorate([
+    (0, common_1.Post)('/predict-transaction'),
+    __param(0, (0, common_1.Res)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Array]),
+    __metadata("design:returntype", Promise)
+], TransactionController.prototype, "addPredictTransaction", null);
 TransactionController = __decorate([
     (0, common_1.Controller)('transaction'),
     __metadata("design:paramtypes", [transaction_service_1.TransactionService,
