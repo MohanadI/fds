@@ -203,4 +203,99 @@ export class TransactionController {
       transaction: deletedTransaction,
     });
   }
+
+  
+  // Submit an already exist transaction and find prediction
+  @Post('/predict-transaction')
+  async addPredictTransaction(
+    @Res() res,
+    @Body() createTransactionDTO: CreateTransactionDTO[],
+  ) {
+    // for (let i = 0; i < createTransactionDTO.length; i++) {
+    //   await this.TransactionService.addTransaction(createTransactionDTO[i]);
+    // }
+
+    const result = createTransactionDTO.reduce(function (r, a) {
+      r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] = r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] || [];
+      r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID].push(a);
+      return r;
+    }, Object.create(null));
+
+    for (let key in result) {
+      let transActivitiesList = result[key];
+      const {
+        HOF_SEQ_ID,
+        SUBSCRIBER_SEQ_ID,
+        VISIT_SEQ,
+        HOSPITAL_DOCTOR_ID,
+        HCP_ID,
+        VISIT_DATE,
+      } = transActivitiesList[0];
+
+      const transactionsForPatientML =
+        await this.TransactionService.getTransactionsByHOFSeqID(HOF_SEQ_ID);
+      const transactionsForDoctorML =
+        await this.TransactionService.getTransactionsByDoctorID(
+          HOSPITAL_DOCTOR_ID,
+          HCP_ID,
+        );
+
+      const newAggregator = new Aggregator();
+      const predictions = await newAggregator.getMLPrediction(
+        HOF_SEQ_ID,
+        SUBSCRIBER_SEQ_ID,
+        VISIT_SEQ,
+        HOSPITAL_DOCTOR_ID,
+        HCP_ID,
+        transactionsForPatientML,
+        transactionsForDoctorML,
+      );
+
+      const patientCluster = predictions.patientResult?.data?.cluster;
+      const doctorCluster = predictions.doctorResult?.data?.cluster;
+
+      const patientPrediction =
+        patientCluster === '1'
+          ? 'Fraud'
+          : patientCluster === '2'
+            ? 'Abuse'
+            : patientCluster === '6'
+              ? 'Waste'
+              : 'Normal';
+      const doctorPrediction =
+        doctorCluster === '5'
+          ? 'Fraud'
+          : patientCluster === '3'
+            ? 'Abuse'
+            : patientCluster === '4'
+              ? 'Waste'
+              : 'Normal';
+
+      const predictionToInsert = {
+        SUBSCRIBER_SEQ_ID: SUBSCRIBER_SEQ_ID,
+        VISIT_SEQ: VISIT_SEQ,
+        DOCTOR_CLUSTER: doctorCluster,
+        PATIENT_CLUSTER: patientCluster,
+        DOCTOR_CLUSTER_PREDICTION: doctorPrediction,
+        PATIENT_CLUSTER_PREDICTION: patientPrediction,
+        VISIT_DATE: VISIT_DATE,
+      };
+
+      console.log(' --------------------- ');
+      console.log(predictionToInsert);
+      console.log(' --------------------- ');
+      // insert new prediction into database ( predictions )
+      let predictionExists = await this.PredictionService.getPredictionBySubAndVisit(SUBSCRIBER_SEQ_ID, VISIT_SEQ);
+      if (predictionExists && predictionExists.length) {
+        await this.PredictionService.editPrediction(predictionExists[0]._id, predictionToInsert);
+      } else {
+        await this.PredictionService.addPrediction(predictionToInsert);
+      }
+    }
+
+    return res.status(HttpStatus.OK).json({
+      message: 'Transaction has been submitted successfully!',
+      transaction: {},
+    });
+  }
 }
