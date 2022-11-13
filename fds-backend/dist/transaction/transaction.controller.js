@@ -19,6 +19,7 @@ const create_transaction_dto_1 = require("./dto/create-transaction.dto");
 const validate_object_id_pipes_1 = require("../shared/pipes/validate-object-id.pipes");
 const aggregator_1 = require("../ml-model/aggregator");
 const prediction_service_1 = require("../prediction/prediction.service");
+const moment = require("moment");
 let TransactionController = class TransactionController {
     constructor(TransactionService, PredictionService) {
         this.TransactionService = TransactionService;
@@ -126,6 +127,12 @@ let TransactionController = class TransactionController {
     }
     async addPredictTransaction(res, createTransactionDTO) {
         var _a, _b, _c, _d;
+        for (let i = 0; i < createTransactionDTO.length; i++) {
+            createTransactionDTO[i]['EFFECTIVE_DATE'] = moment(createTransactionDTO[i]['EFFECTIVE_DATE'], "MM/DD/YYYY").toDate();
+            createTransactionDTO[i]['EXPIRATION_DATE'] = moment(createTransactionDTO[i]['EXPIRATION_DATE'], "MM/DD/YYYY").toDate();
+            createTransactionDTO[i]['VISIT_DATE'] = moment(createTransactionDTO[i]['VISIT_DATE'], "DD/MM/YYYY").toDate();
+            createTransactionDTO[i]['DATE_CREATED'] = moment(createTransactionDTO[i]['DATE_CREATED'], "MM/DD/YYYY HH:mm").toDate();
+        }
         const result = createTransactionDTO.reduce(function (r, a) {
             r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] = r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] || [];
             r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID].push(a);
