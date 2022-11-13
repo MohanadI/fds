@@ -16,6 +16,7 @@ import { CreateTransactionDTO } from './dto/create-transaction.dto';
 import { ValidateObjectId } from '../shared/pipes/validate-object-id.pipes';
 import { Aggregator } from 'src/ml-model/aggregator';
 import { PredictionService } from 'src/prediction/prediction.service';
+import * as moment from 'moment';
 
 @Controller('transaction')
 export class TransactionController {
@@ -211,9 +212,12 @@ export class TransactionController {
     @Res() res,
     @Body() createTransactionDTO: CreateTransactionDTO[],
   ) {
-    // for (let i = 0; i < createTransactionDTO.length; i++) {
-    //   await this.TransactionService.addTransaction(createTransactionDTO[i]);
-    // }
+    for (let i = 0; i < createTransactionDTO.length; i++) {
+      createTransactionDTO[i]['EFFECTIVE_DATE'] = moment(createTransactionDTO[i]['EFFECTIVE_DATE'], "MM/DD/YYYY").toDate()
+      createTransactionDTO[i]['EXPIRATION_DATE'] = moment(createTransactionDTO[i]['EXPIRATION_DATE'], "MM/DD/YYYY").toDate()
+      createTransactionDTO[i]['VISIT_DATE'] = moment(createTransactionDTO[i]['VISIT_DATE'], "DD/MM/YYYY").toDate()
+      createTransactionDTO[i]['DATE_CREATED'] = moment(createTransactionDTO[i]['DATE_CREATED'], "MM/DD/YYYY HH:mm").toDate()
+    }
 
     const result = createTransactionDTO.reduce(function (r, a) {
       r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] = r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID] || [];
