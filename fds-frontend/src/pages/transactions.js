@@ -22,6 +22,7 @@ import SideFilters from "../components/side-filters";
 import {
   GetPredictionsListAPI,
   GetTransactionsListBySubSeqAndVisitSeqAPI,
+  getPredictionBySubscriberSeqIDAndVisitSeq,
 } from "../api/api";
 import useInterval from "../utils/useInterval";
 
@@ -42,7 +43,7 @@ function Transactions() {
     console.log("----------------------------------");
     console.log("fetchPatientPredictions: useEffect()");
     fetchPatientPredictions();
-    
+
   filtersValues = {
     searchText: '',
     PATIENT_CLUSTER_PREDICTION: [],
@@ -91,6 +92,27 @@ function Transactions() {
     try {
       await GetTransactionsListBySubSeqAndVisitSeqAPI(subSeq, visitSeq)
         .then((res) => {
+          if (res && res.data.length > 0) {
+            setCurrentTransactions(res.data);
+          }
+          message.success("Successfully fetched transactions");
+          setIsFetching(false);
+        })
+        .catch((err) => {
+          message.error(err.message);
+          setIsFetching(false);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function getPredictionBySeqAndVisit(subSeq, visitSeq) {
+    setIsFetching(true);
+    try {
+      await getPredictionBySubscriberSeqIDAndVisitSeq(subSeq, visitSeq)
+        .then((res) => {
+          console.log(res, "res");
           if (res && res.data.length > 0) {
             setCurrentTransactions(res.data);
           }
@@ -227,7 +249,7 @@ function Transactions() {
           (p) => p.SUBSCRIBER_SEQ_ID === filtersValues.searchText || p.VISIT_SEQ === filtersValues.searchText
         );
     }
-    
+
     let filterPatient = filtersValues.PATIENT_CLUSTER_PREDICTION;
     if (filterPatient && filterPatient.length) {
       pred = pred?.filter((p) => filterPatient.includes(p.PATIENT_CLUSTER_PREDICTION));
@@ -241,9 +263,21 @@ function Transactions() {
   }
 
   const onSearchHandler = (e) => {
-    const value = e.target.value || "";
-    filtersValues.searchText = value;
-    applyFilters();
+    if (e === ""){
+      message.error("You need to search using SUB_SEQ , VISIT_SEQ");
+    }else{
+      const values = e.split(",");
+      if (values.length !== 2) {
+        message.error("You need to search using SUB_SEQ , VISIT_SEQ");
+      }else{
+        const SUB_SEQ = values[0];
+        const VISIT_SEQ = values[1];
+        getPredictionBySeqAndVisit(
+          SUB_SEQ,
+          VISIT_SEQ
+        );
+      }
+    }
   };
 
   const onFiltersChangeHandler = (filterName, value) => {
@@ -270,7 +304,7 @@ function Transactions() {
               placeholder="Search By SUBSCRIBER_SEQ_ID OR VISIT_SEQ"
               enterButton={<SearchOutlined />}
               size="small"
-              onChange={onSearchHandler}
+              onSearch={onSearchHandler}
             />
           </Col>
           <Col span={4}>

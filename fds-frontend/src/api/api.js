@@ -14,6 +14,7 @@ const ApiNames = Object.freeze({
   POST_T: "Transaction",
   GET_T: "Transactions",
   GET_TRANSACTION_BY_SSI_AND_VI: "transactionsBySSIAndVI",
+  GET_PREDICTIONS_BY_SSI_AND_VI: "getPredictionBySubscriberSeqIDAndVisitSeq",
   POST_P: "Prediction",
   GET_P: "Predictions",
 });
@@ -28,6 +29,12 @@ const GetTransactionsListBySubSeqAndVisitSeqAPI = (subSeq, visitSeq) =>
   axios({
     method: "GET",
     url: `${SERVER_URL}${TRANSACTION_MODULE}${ApiNames.GET_TRANSACTION_BY_SSI_AND_VI}/${subSeq}/${visitSeq}`,
+  });
+
+const getPredictionBySubscriberSeqIDAndVisitSeq = (subSeq, visitSeq) =>
+  axios({
+    method: "GET",
+    url: `${SERVER_URL}${TRANSACTION_MODULE}${ApiNames.GET_PREDICTIONS_BY_SSI_AND_VI}/${subSeq}/${visitSeq}`,
   });
 
 const TransactionsAPI = (transactions) => {
@@ -59,5 +66,6 @@ export {
   GetPredictionsListAPI,
   GetTransactionsListAPI,
   GetTransactionsListBySubSeqAndVisitSeqAPI,
+  getPredictionBySubscriberSeqIDAndVisitSeq,
   TransactionsAPI,
 };
