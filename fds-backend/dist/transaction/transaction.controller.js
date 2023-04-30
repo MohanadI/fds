@@ -97,6 +97,13 @@ let TransactionController = class TransactionController {
         }
         return res.status(common_1.HttpStatus.OK).json(transaction);
     }
+    async getPredictionBySubscriberSeqIDAndVisitSeq(res, SUBSCRIBER_SEQ_ID, VISIT_SEQ) {
+        const transaction = await this.TransactionService.getTransactionBySubscriberSeqIDAndVisitSeq(SUBSCRIBER_SEQ_ID, VISIT_SEQ);
+        if (!transaction) {
+            throw new common_1.NotFoundException('Transaction does not exist!');
+        }
+        this.addPredictTransaction(res, transaction);
+    }
     async getTransactions(res) {
         const transactions = await this.TransactionService.getTransactions();
         return res.status(common_1.HttpStatus.OK).json(transactions);
@@ -138,6 +145,7 @@ let TransactionController = class TransactionController {
             r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID].push(a);
             return r;
         }, Object.create(null));
+        let predictionsResult = [];
         for (let key in result) {
             let transActivitiesList = result[key];
             const { HOF_SEQ_ID, SUBSCRIBER_SEQ_ID, VISIT_SEQ, HOSPITAL_DOCTOR_ID, HCP_ID, VISIT_DATE, } = transActivitiesList[0];
@@ -170,6 +178,7 @@ let TransactionController = class TransactionController {
                 PATIENT_CLUSTER_PREDICTION: patientPrediction,
                 VISIT_DATE: VISIT_DATE,
             };
+            predictionsResult.push(predictionToInsert);
             console.log(' --------------------- ');
             console.log(predictionToInsert);
             console.log(' --------------------- ');
@@ -183,7 +192,8 @@ let TransactionController = class TransactionController {
         }
         return res.status(common_1.HttpStatus.OK).json({
             message: 'Transaction has been submitted successfully!',
-            transaction: {},
+            transaction: createTransactionDTO,
+            predictions: predictionsResult
         });
     }
 };
@@ -212,6 +222,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], TransactionController.prototype, "getTransactionBySubscriberSeqIDAndVisitSeq", null);
+__decorate([
+    (0, common_1.Get)('getPredictionBySubscriberSeqIDAndVisitSeq/:SUBSCRIBER_SEQ_ID/:VISIT_SEQ'),
+    __param(0, (0, common_1.Res)()),
+    __param(1, (0, common_1.Param)('SUBSCRIBER_SEQ_ID')),
+    __param(2, (0, common_1.Param)('VISIT_SEQ')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, Object]),
+    __metadata("design:returntype", Promise)
+], TransactionController.prototype, "getPredictionBySubscriberSeqIDAndVisitSeq", null);
 __decorate([
     (0, common_1.Get)('transactions'),
     __param(0, (0, common_1.Res)()),

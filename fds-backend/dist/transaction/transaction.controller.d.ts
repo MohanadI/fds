@@ -8,6 +8,7 @@ export declare class TransactionController {
     addTransaction(res: any, createTransactionDTO: CreateTransactionDTO[]): Promise<any>;
     getTransaction(res: any, transactionID: any): Promise<any>;
     getTransactionBySubscriberSeqIDAndVisitSeq(res: any, SUBSCRIBER_SEQ_ID: any, VISIT_SEQ: any): Promise<any>;
+    getPredictionBySubscriberSeqIDAndVisitSeq(res: any, SUBSCRIBER_SEQ_ID: any, VISIT_SEQ: any): Promise<void>;
     getTransactions(res: any): Promise<any>;
     getTransactionsBySubscriberSeqID(res: any, SUBSCRIBER_SEQ_ID: any): Promise<any>;
     editTransaction(res: any, transactionID: any, createTransactionDTO: CreateTransactionDTO): Promise<any>;

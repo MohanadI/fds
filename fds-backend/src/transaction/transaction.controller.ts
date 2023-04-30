@@ -150,6 +150,22 @@ export class TransactionController {
     return res.status(HttpStatus.OK).json(transaction);
   }
 
+  @Get('getPredictionBySubscriberSeqIDAndVisitSeq/:SUBSCRIBER_SEQ_ID/:VISIT_SEQ')
+  async getPredictionBySubscriberSeqIDAndVisitSeq(
+    @Res() res,
+    @Param('SUBSCRIBER_SEQ_ID') SUBSCRIBER_SEQ_ID,
+    @Param('VISIT_SEQ') VISIT_SEQ,
+  ) {
+    const transaction = await this.TransactionService.getTransactionBySubscriberSeqIDAndVisitSeq(
+      SUBSCRIBER_SEQ_ID,
+      VISIT_SEQ,
+    );
+    if (!transaction) {
+      throw new NotFoundException('Transaction does not exist!');
+    }
+    this.addPredictTransaction(res, transaction);
+  }
+
   // Fetch all transactions
   @Get('transactions')
   async getTransactions(@Res() res) {
@@ -224,7 +240,7 @@ export class TransactionController {
       r[a.VISIT_SEQ + '_' + a.SUBSCRIBER_SEQ_ID].push(a);
       return r;
     }, Object.create(null));
-
+    let predictionsResult: any[] = [];
     for (let key in result) {
       let transActivitiesList = result[key];
       const {
@@ -284,6 +300,7 @@ export class TransactionController {
         PATIENT_CLUSTER_PREDICTION: patientPrediction,
         VISIT_DATE: VISIT_DATE,
       };
+      predictionsResult.push(predictionToInsert);
 
       console.log(' --------------------- ');
       console.log(predictionToInsert);
@@ -299,7 +316,8 @@ export class TransactionController {
 
     return res.status(HttpStatus.OK).json({
       message: 'Transaction has been submitted successfully!',
-      transaction: {},
+      transaction: createTransactionDTO,
+      predictions: predictionsResult
     });
   }
 }
