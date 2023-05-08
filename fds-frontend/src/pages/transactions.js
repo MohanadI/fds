@@ -26,8 +26,6 @@ import {
 } from "../api/api";
 import useInterval from "../utils/useInterval";
 
-var filtersValues;
-
 function Transactions() {
   const { Search } = Input;
   const { Panel } = Collapse;
@@ -37,18 +35,17 @@ function Transactions() {
   const [filteredPredictions, setFilteredPredictions] = useState([]);
   const [currentTransactions, setCurrentTransactions] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState({});
-  const [isFetching, setIsFetching] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
+  const [filtersValues, setFiltersValues] = useState({
+    searchText: '',
+    PATIENT_CLUSTER_PREDICTION: [],
+    DOCTOR_CLUSTER_PREDICTION: []
+  });
 
   useEffect(() => {
     console.log("----------------------------------");
     console.log("fetchPatientPredictions: useEffect()");
     fetchPatientPredictions();
-
-  filtersValues = {
-    searchText: '',
-    PATIENT_CLUSTER_PREDICTION: [],
-    DOCTOR_CLUSTER_PREDICTION: []
-  }
   }, []);
 
   useEffect(() => {
@@ -61,10 +58,6 @@ function Transactions() {
       );
     }
   }, [selectedTransaction]);
-
-  // useInterval(() => {
-  //   fetchPatientPredictions();
-  // }, 60 * 1000);
 
   async function fetchPatientPredictions() {
     setIsFetching(true);
@@ -112,11 +105,11 @@ function Transactions() {
     try {
       await getPredictionBySubscriberSeqIDAndVisitSeq(subSeq, visitSeq)
         .then((res) => {
-          console.log(res, "res");
-          if (res && res.data.length > 0) {
-            setCurrentTransactions(res.data);
+          if (res && res.predictions.length > 0) {
+            setPredictions(res.predictions);
+            setFilteredPredictions(res.predictions);
           }
-          message.success("Successfully fetched transactions");
+          message.success("Successfully fetched predictions!!");
           setIsFetching(false);
         })
         .catch((err) => {
@@ -165,10 +158,10 @@ function Transactions() {
       render: (text, record) => record.VISIT_SEQ,
     },
     {
-      title: "Created Date",
-      dataIndex: "DATE_CREATED",
-      key: "DATE_CREATED",
-      render: (text, record) => record.DATE_CREATED,
+      title: "Visit Date",
+      dataIndex: "VISIT_DATE",
+      key: "VISIT_DATE",
+      render: (text, record) => new Date(record.VISIT_DATE).toLocaleDateString("en-US"),
     },
     {
       title: "Doctor Prediction",
@@ -189,56 +182,7 @@ function Transactions() {
 
         return <Tag color={prediction.color}>{prediction.text}</Tag>;
       },
-    },
-    {
-      title: "Details",
-      dataIndex: "details",
-      key: "details",
-      render: (text, record) => {
-        return (
-          <Collapse
-            style={{ width: "400px" }}
-            onChange={(key) => {
-              if (key.length !== 0) {
-                setSelectedTransaction({
-                  SUBSCRIBER_SEQ_ID: record.SUBSCRIBER_SEQ_ID,
-                  VISIT_SEQ: record.VISIT_SEQ,
-                });
-              }
-            }}
-          >
-            <Panel header="Show transaction details" key={record._id}>
-              <Title style={{ fontSize: 14, marginBottom: 15 }}>
-                Transaction Procedures:{" "}
-              </Title>
-              {currentTransactions &&
-                currentTransactions.length > 0 &&
-                currentTransactions.map((transaction) => {
-                  return (
-                    <>
-                      <Timeline>
-                        <Timeline.Item>
-                          <b>HCP Type: </b> {transaction.HCP_Type}
-                        </Timeline.Item>
-                        <Timeline.Item>
-                          <b>DOCTOR ID: </b> {transaction.DOCTOR_ID}
-                        </Timeline.Item>
-                        <Timeline.Item>
-                          <b>CITY: </b> {transaction.CITY}
-                        </Timeline.Item>
-                        <Timeline.Item>
-                          <b>BRAND: </b> {transaction.BRAND}
-                        </Timeline.Item>
-                      </Timeline>
-                      <Divider />
-                    </>
-                  );
-                })}
-            </Panel>
-          </Collapse>
-        );
-      },
-    },
+    }
   ];
 
   const applyFilters = () => {
@@ -246,8 +190,8 @@ function Transactions() {
 
     if (filtersValues.searchText) {
       pred = pred?.filter(
-          (p) => p.SUBSCRIBER_SEQ_ID === filtersValues.searchText || p.VISIT_SEQ === filtersValues.searchText
-        );
+        (p) => p.SUBSCRIBER_SEQ_ID === filtersValues.searchText || p.VISIT_SEQ === filtersValues.searchText
+      );
     }
 
     let filterPatient = filtersValues.PATIENT_CLUSTER_PREDICTION;
@@ -263,13 +207,13 @@ function Transactions() {
   }
 
   const onSearchHandler = (e) => {
-    if (e === ""){
+    if (e === "") {
       message.error("You need to search using SUB_SEQ , VISIT_SEQ");
-    }else{
+    } else {
       const values = e.split(",");
       if (values.length !== 2) {
         message.error("You need to search using SUB_SEQ , VISIT_SEQ");
-      }else{
+      } else {
         const SUB_SEQ = values[0];
         const VISIT_SEQ = values[1];
         getPredictionBySeqAndVisit(
@@ -281,7 +225,8 @@ function Transactions() {
   };
 
   const onFiltersChangeHandler = (filterName, value) => {
-    filtersValues[filterName] = value;
+    const tempFilterValues = { ...filtersValues, filterName: value };
+    setFiltersValues(tempFilterValues);
     applyFilters();
   };
 
@@ -289,16 +234,10 @@ function Transactions() {
     <div>
       <Spin spinning={isFetching}>
         <Row>
-          <Col span={3}>
+          <Col span={4}>
             <Title className="page-title">Transactions</Title>
           </Col>
-          <Col span={1}>
-            <Divider
-              type="vertical"
-              style={{ height: "100%", background: "#202b3c" }}
-            />
-          </Col>
-          <Col span={16}>
+          <Col span={20}>
             <Search
               className="search-area"
               placeholder="Search By SUBSCRIBER_SEQ_ID OR VISIT_SEQ"
@@ -307,16 +246,55 @@ function Transactions() {
               onSearch={onSearchHandler}
             />
           </Col>
-          <Col span={4}>
-            <PickerWithType />
-          </Col>
         </Row>
         <Row style={{ marginTop: "15px" }}>
           <Col span={4}>
             <SideFilters onFiltersChange={onFiltersChangeHandler} />
           </Col>
           <Col span={20}>
-            <Table columns={columns} dataSource={filteredPredictions} />
+            <Table
+              columns={columns}
+              dataSource={filteredPredictions}
+              onExpand={
+                (record, text) => {
+                  if (record) {
+                    setSelectedTransaction({
+                      SUBSCRIBER_SEQ_ID: text.SUBSCRIBER_SEQ_ID,
+                      VISIT_SEQ: text.VISIT_SEQ,
+                    });
+                  }
+                }
+              }
+              expandable={{
+                expandedRowRender: (record) =>
+                (
+                  <>
+                    {currentTransactions &&
+                      currentTransactions.length > 0 &&
+                      currentTransactions.map((transaction) => (
+                        <>
+                          <Timeline>
+                            <Timeline.Item>
+                              <b>HCP Type: </b> {transaction.HCP_Type}
+                            </Timeline.Item>
+                            <Timeline.Item>
+                              <b>DOCTOR ID: </b> {transaction.DOCTOR_ID}
+                            </Timeline.Item>
+                            <Timeline.Item>
+                              <b>CITY: </b> {transaction.CITY}
+                            </Timeline.Item>
+                            <Timeline.Item>
+                              <b>BRAND: </b> {transaction.BRAND}
+                            </Timeline.Item>
+                          </Timeline>
+                          <Divider style={{ margin: "0px 0 20px 0" }}/>
+                        </>
+                      ))
+                    }
+                  </>
+                )
+              }}
+            />
           </Col>
         </Row>
       </Spin>

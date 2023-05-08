@@ -3,6 +3,9 @@
   padding: 0;
   height: 50px;
 }
+.ant-timeline-item{
+  padding-bottom:3px;
+}
 .ant-layout-header .ant-menu {
   background-color: #202b3d;
   border-bottom: 0;
@@ -10,6 +13,9 @@
 }
 .ant-menu-horizontal > .ant-menu-item, .ant-menu-horizontal > .ant-menu-submenu{
   top: -4px;
+}
+.ant-timeline-item-last>.ant-timeline-item-content {
+    min-height: 25px;
 }
 .ant-layout-content {
   background-color: #ffffff;
