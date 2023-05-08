@@ -32,6 +32,8 @@ export class TransactionService {
     SUBSCRIBER_SEQ_ID,
     VISIT_SEQ,
   ): Promise<Transaction[]> {
+    VISIT_SEQ = parseInt(VISIT_SEQ);
+    SUBSCRIBER_SEQ_ID = parseInt(SUBSCRIBER_SEQ_ID);
     const transactions = await this.transactionModel
       .find()
       .where({
