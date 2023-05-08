@@ -160,6 +160,7 @@ export class TransactionController {
       SUBSCRIBER_SEQ_ID,
       VISIT_SEQ,
     );
+    console.log('transaction', transaction)
     if (!transaction) {
       throw new NotFoundException('Transaction does not exist!');
     }
