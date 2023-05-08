@@ -105,9 +105,9 @@ function Transactions() {
     try {
       await getPredictionBySubscriberSeqIDAndVisitSeq(subSeq, visitSeq)
         .then((res) => {
-          if (res && res.predictions.length > 0) {
-            setPredictions(res.predictions);
-            setFilteredPredictions(res.predictions);
+          if (res && res.data.predictions.length > 0) {
+            setPredictions(res.data.predictions);
+            setFilteredPredictions(res.data.predictions);
           }
           message.success("Successfully fetched predictions!!");
           setIsFetching(false);
@@ -254,6 +254,7 @@ function Transactions() {
           <Col span={20}>
             <Table
               columns={columns}
+              rowKey="_id"
               dataSource={filteredPredictions}
               onExpand={
                 (record, text) => {

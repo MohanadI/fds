@@ -32,10 +32,6 @@ export class TransactionService {
     SUBSCRIBER_SEQ_ID,
     VISIT_SEQ,
   ): Promise<Transaction[]> {
-    VISIT_SEQ = parseInt(VISIT_SEQ);
-    SUBSCRIBER_SEQ_ID = parseInt(SUBSCRIBER_SEQ_ID);
-    console.log('SUBSCRIBER_SEQ_ID', typeof SUBSCRIBER_SEQ_ID, SUBSCRIBER_SEQ_ID)
-    console.log('VISIT_SEQ', typeof VISIT_SEQ, VISIT_SEQ)
     const transactions = await this.transactionModel
       .find()
       .where({
